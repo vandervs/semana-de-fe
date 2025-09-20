@@ -6,7 +6,7 @@ import { MessageCircle, BookOpen, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const interactionDetails: {
-    [key in Initiative['interactionType']]: {
+    [key: string]: {
         icon: React.ElementType;
         label: string;
         badgeVariant: "default" | "secondary" | "outline" | "destructive";
@@ -34,11 +34,9 @@ const interactionDetails: {
 };
 
 export function TestimonyCard({ initiative }: { initiative: Initiative }) {
-    const details = interactionDetails[initiative.interactionType];
-    const Icon = details.icon;
-
+    
     const formattedDate = new Date(initiative.date).toLocaleDateString('pt-BR', {
-      timeZone: 'UTC', // Dates in mock data don't have timezone, so UTC is safe
+      timeZone: 'UTC', 
     });
 
     return (
@@ -55,10 +53,19 @@ export function TestimonyCard({ initiative }: { initiative: Initiative }) {
                 </div>
             </CardHeader>
             <CardContent className="p-6 flex-1">
-                <Badge variant={details.badgeVariant} className="mb-4">
-                    <Icon className={cn("mr-2 h-4 w-4", details.iconClassName)} />
-                    {details.label}
-                </Badge>
+                <div className="flex flex-wrap gap-2 mb-4">
+                {initiative.interactionTypes.map(type => {
+                    const details = interactionDetails[type];
+                    if (!details) return null;
+                    const Icon = details.icon;
+                    return (
+                        <Badge key={type} variant={details.badgeVariant}>
+                            <Icon className={cn("mr-2 h-4 w-4", details.iconClassName)} />
+                            {details.label}
+                        </Badge>
+                    );
+                })}
+                </div>
                 <p className="mb-4 text-muted-foreground italic">"{initiative.testimony}"</p>
             </CardContent>
             <CardFooter className="flex justify-between text-sm text-muted-foreground p-6 pt-0">

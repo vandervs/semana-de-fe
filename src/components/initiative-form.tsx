@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
-import { MessageCircle, BookOpen, UserCheck } from "lucide-react";
+import { MessageCircle, BookOpen, UserCheck, PlusCircle, X } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,21 +18,34 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 import { LocationSearch } from "./location-search";
+
+const personSchema = z.object({
+    name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
+    contact: z.string().optional(),
+});
 
 const formSchema = z.object({
   locationName: z.string().min(3, { message: "A localização deve ter pelo menos 3 caracteres." }),
   latitude: z.number(),
   longitude: z.number(),
-  evangelizedName: z.string().min(2, { message: "O nome da pessoa deve ter pelo menos 2 caracteres." }),
-  evangelistName: z.string().min(2, { message: "Seu nome deve ter pelo menos 2 caracteres." }),
+  evangelists: z.array(personSchema).min(1, "Adicione pelo menos um evangelista."),
+  evangelized: z.array(personSchema).min(1, "Adicione pelo menos uma pessoa evangelizada."),
   testimony: z.string().min(20, { message: "O testemunho deve ter pelo menos 20 caracteres." }).max(500, { message: "O testemunho não pode exceder 500 caracteres."}),
-  interactionType: z.enum(["conversation", "presentation", "acceptance"], { required_error: "Você precisa selecionar um tipo de interação." }),
-  photo: z.any().optional(), // Em um aplicativo real, você validaria este arquivo
+  interactionTypes: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: "Você precisa selecionar pelo menos um tipo de interação.",
+  }),
+  photo: z.any().optional(),
 });
+
+const interactionTypesItems = [
+    { id: "conversation", label: "Conversa Espiritual", icon: MessageCircle },
+    { id: "presentation", label: "Apresentação do Evangelho", icon: BookOpen },
+    { id: "acceptance", label: "Aceitou a Cristo", icon: UserCheck },
+]
 
 export function InitiativeForm() {
     const [isSuccess, setIsSuccess] = React.useState(false);
@@ -41,14 +54,24 @@ export function InitiativeForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             locationName: "",
-            evangelizedName: "",
-            evangelistName: "",
             testimony: "",
+            evangelists: [{ name: "" }],
+            evangelized: [{ name: "" }],
+            interactionTypes: [],
         },
+    });
+    
+    const { fields: evangelistsFields, append: appendEvangelist, remove: removeEvangelist } = useFieldArray({
+        control: form.control,
+        name: "evangelists",
+    });
+
+    const { fields: evangelizedFields, append: appendEvangelized, remove: removeEvangelized } = useFieldArray({
+        control: form.control,
+        name: "evangelized",
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        // Em um aplicativo real, você chamaria uma ação de servidor aqui.
         console.log("Formulário enviado:", values);
         
         setIsSuccess(true);
@@ -60,7 +83,7 @@ export function InitiativeForm() {
     }
 
     return (
-        <Card className="w-full max-w-2xl mx-auto">
+        <Card className="w-full max-w-3xl mx-auto">
             <CardHeader>
                 <CardTitle>Compartilhe Sua História</CardTitle>
                 <CardDescription>Preencha o formulário abaixo para adicionar uma iniciativa ao mapa.</CardDescription>
@@ -68,33 +91,95 @@ export function InitiativeForm() {
             <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <FormField
-                                control={form.control}
-                                name="evangelistName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Seu Nome</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="ex: João" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="evangelizedName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nome da Pessoa</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="ex: Maria" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                        
+                        <div className="space-y-4">
+                            <FormLabel>Evangelistas</FormLabel>
+                            {evangelistsFields.map((field, index) => (
+                                <div key={field.id} className="flex items-end gap-2">
+                                    <div className="grid grid-cols-2 gap-2 flex-1">
+                                         <FormField
+                                            control={form.control}
+                                            name={`evangelists.${index}.name`}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className={cn(index !== 0 && "sr-only")}>Nome</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="ex: João" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                         <FormField
+                                            control={form.control}
+                                            name={`evangelists.${index}.contact`}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className={cn(index !== 0 && "sr-only")}>Contato (opcional)</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Telefone ou e-mail" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    {evangelistsFields.length > 1 && (
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeEvangelist(index)}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            ))}
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendEvangelist({ name: "" })}>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Adicionar evangelista
+                            </Button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <FormLabel>Pessoas Evangelizadas</FormLabel>
+                            {evangelizedFields.map((field, index) => (
+                                <div key={field.id} className="flex items-end gap-2">
+                                    <div className="grid grid-cols-2 gap-2 flex-1">
+                                        <FormField
+                                            control={form.control}
+                                            name={`evangelized.${index}.name`}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                     <FormLabel className={cn(index !== 0 && "sr-only")}>Nome</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="ex: Maria" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                         <FormField
+                                            control={form.control}
+                                            name={`evangelized.${index}.contact`}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                     <FormLabel className={cn(index !== 0 && "sr-only")}>Contato (opcional)</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Telefone ou e-mail" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    {evangelizedFields.length > 1 && (
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeEvangelized(index)}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            ))}
+                             <Button type="button" variant="outline" size="sm" onClick={() => appendEvangelized({ name: "" })}>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Adicionar pessoa
+                            </Button>
                         </div>
 
                          <FormField
@@ -141,45 +226,51 @@ export function InitiativeForm() {
 
                         <FormField
                             control={form.control}
-                            name="interactionType"
-                            render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                    <FormLabel>Tipo de Interação</FormLabel>
-                                    <FormControl>
-                                        <RadioGroup
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            className="flex flex-col md:flex-row gap-4 pt-2"
-                                        >
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value="conversation" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal flex items-center">
-                                                    <MessageCircle className="mr-2 h-5 w-5 text-muted-foreground" />
-                                                    Conversa Espiritual
-                                                </FormLabel>
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value="presentation" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal flex items-center">
-                                                    <BookOpen className="mr-2 h-5 w-5 text-muted-foreground" />
-                                                    Apresentação do Evangelho
-                                                </FormLabel>
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value="acceptance" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal flex items-center">
-                                                    <UserCheck className="mr-2 h-5 w-5 text-muted-foreground" />
-                                                    Aceitou a Cristo
-                                                </FormLabel>
-                                            </FormItem>
-                                        </RadioGroup>
-                                    </FormControl>
+                            name="interactionTypes"
+                            render={() => (
+                                <FormItem>
+                                    <div className="mb-4">
+                                        <FormLabel>Tipos de Interação</FormLabel>
+                                        <FormDescription>
+                                            Selecione todas as opções que se aplicam.
+                                        </FormDescription>
+                                    </div>
+                                    <div className="flex flex-col md:flex-row gap-4 pt-2">
+                                        {interactionTypesItems.map((item) => (
+                                            <FormField
+                                                key={item.id}
+                                                control={form.control}
+                                                name="interactionTypes"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-start space-x-3 space-y-0"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(item.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, item.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== item.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal flex items-center">
+                                                                <item.icon className="mr-2 h-5 w-5 text-muted-foreground" />
+                                                                {item.label}
+                                                            </FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
