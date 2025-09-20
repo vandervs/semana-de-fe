@@ -23,12 +23,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle } from "lucide-react";
 
 const formSchema = z.object({
-  locationName: z.string().min(3, { message: "Location must be at least 3 characters." }),
-  evangelizedName: z.string().min(2, { message: "Person's name must be at least 2 characters." }),
-  evangelistName: z.string().min(2, { message: "Your name must be at least 2 characters." }),
-  testimony: z.string().min(20, { message: "Testimony must be at least 20 characters." }).max(500, { message: "Testimony cannot exceed 500 characters."}),
-  interactionType: z.enum(["conversation", "presentation", "acceptance"], { required_error: "You need to select an interaction type." }),
-  photo: z.any().optional(), // In a real app, you would validate this file
+  locationName: z.string().min(3, { message: "A localização deve ter pelo menos 3 caracteres." }),
+  evangelizedName: z.string().min(2, { message: "O nome da pessoa deve ter pelo menos 2 caracteres." }),
+  evangelistName: z.string().min(2, { message: "Seu nome deve ter pelo menos 2 caracteres." }),
+  testimony: z.string().min(20, { message: "O testemunho deve ter pelo menos 20 caracteres." }).max(500, { message: "O testemunho não pode exceder 500 caracteres."}),
+  interactionType: z.enum(["conversation", "presentation", "acceptance"], { required_error: "Você precisa selecionar um tipo de interação." }),
+  photo: z.any().optional(), // Em um aplicativo real, você validaria este arquivo
 });
 
 export function InitiativeForm() {
@@ -45,8 +45,8 @@ export function InitiativeForm() {
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        // In a real app, you'd call a server action here.
-        console.log("Form submitted:", values);
+        // Em um aplicativo real, você chamaria uma ação de servidor aqui.
+        console.log("Formulário enviado:", values);
         
         setIsSuccess(true);
         form.reset();
@@ -59,8 +59,8 @@ export function InitiativeForm() {
     return (
         <Card className="w-full max-w-2xl mx-auto">
             <CardHeader>
-                <CardTitle>Share Your Story</CardTitle>
-                <CardDescription>Fill out the form below to add an initiative to the map.</CardDescription>
+                <CardTitle>Compartilhe Sua História</CardTitle>
+                <CardDescription>Preencha o formulário abaixo para adicionar uma iniciativa ao mapa.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -71,9 +71,9 @@ export function InitiativeForm() {
                                 name="evangelistName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Your Name</FormLabel>
+                                        <FormLabel>Seu Nome</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., João" {...field} />
+                                            <Input placeholder="ex: João" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -84,9 +84,9 @@ export function InitiativeForm() {
                                 name="evangelizedName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Person's Name</FormLabel>
+                                        <FormLabel>Nome da Pessoa</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., Maria" {...field} />
+                                            <Input placeholder="ex: Maria" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -99,12 +99,12 @@ export function InitiativeForm() {
                             name="locationName"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Location</FormLabel>
+                                    <FormLabel>Localização</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g., São Paulo, SP" {...field} />
+                                        <Input placeholder="ex: São Paulo, SP" {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        Please provide the city and state.
+                                        Por favor, forneça a cidade e o estado.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -116,10 +116,10 @@ export function InitiativeForm() {
                             name="testimony"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Testimony</FormLabel>
+                                    <FormLabel>Testemunho</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Share a brief testimony of how it went..."
+                                            placeholder="Compartilhe um breve testemunho de como foi..."
                                             className="resize-none"
                                             rows={4}
                                             {...field}
@@ -135,7 +135,7 @@ export function InitiativeForm() {
                             name="interactionType"
                             render={({ field }) => (
                                 <FormItem className="space-y-3">
-                                    <FormLabel>Type of Interaction</FormLabel>
+                                    <FormLabel>Tipo de Interação</FormLabel>
                                     <FormControl>
                                         <RadioGroup
                                             onValueChange={field.onChange}
@@ -148,7 +148,7 @@ export function InitiativeForm() {
                                                 </FormControl>
                                                 <FormLabel className="font-normal flex items-center">
                                                     <MessageCircle className="mr-2 h-5 w-5 text-muted-foreground" />
-                                                    Spiritual Conversation
+                                                    Conversa Espiritual
                                                 </FormLabel>
                                             </FormItem>
                                             <FormItem className="flex items-center space-x-3 space-y-0">
@@ -157,7 +157,7 @@ export function InitiativeForm() {
                                                 </FormControl>
                                                 <FormLabel className="font-normal flex items-center">
                                                     <BookOpen className="mr-2 h-5 w-5 text-muted-foreground" />
-                                                    Gospel Presentation
+                                                    Apresentação do Evangelho
                                                 </FormLabel>
                                             </FormItem>
                                             <FormItem className="flex items-center space-x-3 space-y-0">
@@ -166,7 +166,7 @@ export function InitiativeForm() {
                                                 </FormControl>
                                                 <FormLabel className="font-normal flex items-center">
                                                     <UserCheck className="mr-2 h-5 w-5 text-muted-foreground" />
-                                                    Accepted Christ
+                                                    Aceitou a Cristo
                                                 </FormLabel>
                                             </FormItem>
                                         </RadioGroup>
@@ -181,12 +181,12 @@ export function InitiativeForm() {
                             name="photo"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Photo (Optional)</FormLabel>
+                                    <FormLabel>Foto (Opcional)</FormLabel>
                                     <FormControl>
                                         <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
                                     </FormControl>
                                     <FormDescription>
-                                        A picture of the moment or place.
+                                        Uma foto do momento ou do lugar.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -196,12 +196,12 @@ export function InitiativeForm() {
                         {isSuccess && (
                             <div className="rounded-md border border-green-500/20 bg-green-500/10 p-4 flex items-center gap-3 text-sm text-green-800 dark:text-green-200">
                                 <CheckCircle className="h-5 w-5"/>
-                                <p>Thank you for your submission! It will appear on the map shortly.</p>
+                                <p>Obrigado pela sua submissão! Ela aparecerá no mapa em breve.</p>
                             </div>
                         )}
 
                         <Button type="submit" size="lg" className="w-full md:w-auto" disabled={form.formState.isSubmitting}>
-                           {form.formState.isSubmitting ? 'Submitting...' : 'Submit to Map'}
+                           {form.formState.isSubmitting ? 'Enviando...' : 'Enviar para o Mapa'}
                         </Button>
                     </form>
                 </Form>

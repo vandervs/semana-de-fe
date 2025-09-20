@@ -24,17 +24,10 @@ const defaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = defaultIcon;
 
-const InteractionIcon = ({ type }: { type: Initiative['interactionType'] }) => {
-  switch (type) {
-    case 'conversation':
-      return <MessageCircle className="h-4 w-4 mr-2 inline-block text-blue-500" />;
-    case 'presentation':
-      return <BookOpen className="h-4 w-4 mr-2 inline-block text-green-500" />;
-    case 'acceptance':
-      return <UserCheck className="h-4 w-4 mr-2 inline-block text-amber-500" />;
-    default:
-      return null;
-  }
+const interactionTypes: { [key: string]: string } = {
+  conversation: "Conversa Espiritual",
+  presentation: "Apresentação do Evangelho",
+  acceptance: "Aceitou a Cristo",
 };
 
 interface MapDisplayProps {
@@ -67,10 +60,10 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ initiatives }) => {
                         ${initiative.locationName}
                     </h3>
                     <div class="text-sm mb-2 capitalize font-medium">
-                        ${initiative.interactionType.replace('_', ' ')}
+                        ${interactionTypes[initiative.interactionType] || initiative.interactionType}
                     </div>
                     <p class="text-sm text-gray-500 mb-2 italic">"${initiative.testimony}"</p>
-                    <p class="text-xs text-right text-gray-500">- ${initiative.evangelistName} with ${initiative.evangelizedName}</p>
+                    <p class="text-xs text-right text-gray-500">- ${initiative.evangelistName} com ${initiative.evangelizedName}</p>
                 </div>
             `;
             marker.bindPopup(popupContent);

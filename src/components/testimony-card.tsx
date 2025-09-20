@@ -15,19 +15,19 @@ const interactionDetails: {
 } = {
     conversation: {
         icon: MessageCircle,
-        label: "Spiritual Conversation",
+        label: "Conversa Espiritual",
         badgeVariant: "outline",
         iconClassName: "text-accent-foreground"
     },
     presentation: {
         icon: BookOpen,
-        label: "Gospel Presentation",
+        label: "Apresentação do Evangelho",
         badgeVariant: "secondary",
         iconClassName: "text-secondary-foreground"
     },
     acceptance: {
         icon: UserCheck,
-        label: "Accepted Christ",
+        label: "Aceitou a Cristo",
         badgeVariant: "default",
         iconClassName: "text-primary-foreground"
     },
@@ -37,13 +37,17 @@ export function TestimonyCard({ initiative }: { initiative: Initiative }) {
     const details = interactionDetails[initiative.interactionType];
     const Icon = details.icon;
 
+    const formattedDate = new Date(initiative.date).toLocaleDateString('pt-BR', {
+      timeZone: 'UTC', // Dates in mock data don't have timezone, so UTC is safe
+    });
+
     return (
         <Card className="flex h-full flex-col overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl">
             <CardHeader className="p-0">
                 <div className="relative aspect-video w-full">
                     <Image
                         src={initiative.photoUrl}
-                        alt={`Testimony from ${initiative.locationName}`}
+                        alt={`Testemunho de ${initiative.locationName}`}
                         fill
                         className="object-cover"
                         data-ai-hint={initiative.photoHint}
@@ -59,7 +63,7 @@ export function TestimonyCard({ initiative }: { initiative: Initiative }) {
             </CardContent>
             <CardFooter className="flex justify-between text-sm text-muted-foreground p-6 pt-0">
                 <span>{initiative.locationName}</span>
-                <span>{new Date(initiative.date).toLocaleDateString()}</span>
+                <span>{formattedDate}</span>
             </CardFooter>
         </Card>
     );

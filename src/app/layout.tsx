@@ -4,8 +4,8 @@ import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Gospel Echoes',
-  description: 'Mapping evangelism initiatives across Southeast Brazil.',
+  title: 'Ecos do Evangelho',
+  description: 'Mapeando iniciativas de evangelismo no Sudeste do Brasil.',
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

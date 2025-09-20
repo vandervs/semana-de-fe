@@ -2,33 +2,33 @@
   "placeholderImages": [
     {
       "id": "1",
-      "description": "Testimony from São Paulo",
+      "description": "Testemunho de São Paulo",
       "imageUrl": "https://picsum.photos/seed/ev1/600/400",
-      "imageHint": "smiling person"
+      "imageHint": "pessoa sorrindo"
     },
     {
       "id": "2",
-      "description": "Testimony from Rio de Janeiro",
+      "description": "Testemunho do Rio de Janeiro",
       "imageUrl": "https://picsum.photos/seed/ev2/600/400",
-      "imageHint": "beach sunset"
+      "imageHint": "pôr do sol na praia"
     },
     {
       "id": "3",
-      "description": "Testimony from Belo Horizonte",
+      "description": "Testemunho de Belo Horizonte",
       "imageUrl": "https://picsum.photos/seed/ev3/600/400",
-      "imageHint": "city park"
+      "imageHint": "parque da cidade"
     },
     {
       "id": "4",
-      "description": "Testimony from Vitória",
+      "description": "Testemunho de Vitória",
       "imageUrl": "https://picsum.photos/seed/ev4/600/400",
-      "imageHint": "ocean view"
+      "imageHint": "vista para o mar"
     },
     {
       "id": "5",
-      "description": "Testimony from Campinas",
+      "description": "Testemunho de Campinas",
       "imageUrl": "https://picsum.photos/seed/ev5/600/400",
-      "imageHint": "university campus"
+      "imageHint": "campus universitário"
     }
   ]
 }

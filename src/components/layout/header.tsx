@@ -11,8 +11,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Map", href: "/" },
-  { label: "Testimonies", href: "/testimonies" },
+  { label: "Mapa", href: "/" },
+  { label: "Testemunhos", href: "/testimonies" },
 ];
 
 export function Header() {
@@ -25,7 +25,7 @@ export function Header() {
         <div className="flex gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <Waves className="h-6 w-6 text-primary" />
-            <span className="inline-block font-bold">Gospel Echoes</span>
+            <span className="inline-block font-bold">Ecos do Evangelho</span>
           </Link>
           <nav className="hidden gap-6 md:flex">
             {navItems.map((item) => (
@@ -46,7 +46,7 @@ export function Header() {
         <div className="flex flex-1 items-center justify-end space-x-4">
             <div className="hidden md:flex">
                 <Button asChild>
-                    <Link href="/submit">Submit Initiative</Link>
+                    <Link href="/submit">Enviar Iniciativa</Link>
                 </Button>
             </div>
             <div className="md:hidden">
@@ -54,16 +54,16 @@ export function Header() {
                     <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
                         <Menu className="h-5 w-5" />
-                        <span className="sr-only">Toggle Menu</span>
+                        <span className="sr-only">Alternar Menu</span>
                     </Button>
                     </SheetTrigger>
                     <SheetContent side="right">
                     <Link href="/" className="mb-8 flex items-center" onClick={() => setIsSheetOpen(false)}>
                         <Waves className="mr-2 h-6 w-6 text-primary" />
-                        <span className="font-bold">Gospel Echoes</span>
+                        <span className="font-bold">Ecos do Evangelho</span>
                     </Link>
                     <nav className="flex flex-col gap-6">
-                        {[...navItems, {label: "Submit Initiative", href: "/submit"}].map((item) => (
+                        {[...navItems, {label: "Enviar Iniciativa", href: "/submit"}].map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
