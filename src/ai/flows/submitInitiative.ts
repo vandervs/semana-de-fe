@@ -56,11 +56,10 @@ const submitInitiativeFlow = ai.defineFlow(
   {
     name: 'submitInitiativeFlow',
     inputSchema: InitiativeInputSchema,
-    outputSchema: z.custom<Initiative>(),
+    outputSchema: z.void(),
   },
   async (input) => {
-    const newId = Date.now().toString();
-
+    
     let photoUrl = '';
     let photoHint = 'abstrato moderno';
 
@@ -81,22 +80,19 @@ const submitInitiativeFlow = ai.defineFlow(
         photoUrl = `https://picsum.photos/seed/ev${seed}/600/400`;
     }
 
-    const newInitiative: Initiative = {
+    const newInitiative: Omit<Initiative, 'id'> = {
         ...input,
-        id: newId,
         date: new Date().toISOString().split('T')[0],
         interactionTypes: input.interactionTypes as any,
         photoUrl,
         photoHint,
     };
     
-    addInitiative(newInitiative);
-
-    return newInitiative;
+    await addInitiative(newInitiative);
   }
 );
 
 
-export async function submitInitiative(input: InitiativeInput): Promise<Initiative> {
-    return await submitInitiativeFlow(input);
+export async function submitInitiative(input: InitiativeInput): Promise<void> {
+    await submitInitiativeFlow(input);
 }

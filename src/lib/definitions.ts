@@ -15,4 +15,5 @@ export type Initiative = {
   testimony: string;
   interactionTypes: ('conversation' | 'presentation' | 'acceptance')[];
   date: string;
+  createdAt?: any; 
 };

@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { MessageCircle, BookOpen, UserCheck, PlusCircle, X } from "lucide-react";
 import React from "react";
+import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +55,7 @@ const interactionTypesItems = [
 export function InitiativeForm() {
     const [isSuccess, setIsSuccess] = React.useState(false);
     const { toast } = useToast();
+    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -83,6 +85,9 @@ export function InitiativeForm() {
             await submitInitiative(values);
             setIsSuccess(true);
             form.reset();
+
+            // Refresh the data on other pages
+            router.refresh();
 
             setTimeout(() => {
                 setIsSuccess(false);
@@ -302,7 +307,7 @@ export function InitiativeForm() {
                                         <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
                                     </FormControl>
                                     <FormDescription>
-                                        Uma foto do momento ou do lugar.
+                                        Uma foto do momento ou do lugar. Se não for enviada, uma imagem será gerada por IA.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
