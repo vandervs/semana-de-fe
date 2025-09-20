@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { Map, Marker, Icon, IconOptions, LatLngExpression, LeafletMouseEvent } from "leaflet";
+import { useToast } from "@/hooks/use-toast";
 
 type Suggestion = {
   place_id: number;
@@ -23,22 +24,24 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
   const [selectedLocation, setSelectedLocation] = useState<Suggestion | null>(null);
   
   const debouncedQuery = useDebounce(query, 500);
+  const { toast } = useToast();
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const markerRef = useRef<Marker | null>(null);
   const LRef = useRef<typeof import("leaflet") | null>(null);
 
+  // Dynamically import Leaflet on the client side
   useEffect(() => {
-    // Import Leaflet dynamically on the client side
     import("leaflet").then(L => {
         LRef.current = L;
     });
   }, []);
 
+  // Fetch search suggestions
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (debouncedQuery.length < 3) {
+      if (debouncedQuery.length < 3 || (selectedLocation && debouncedQuery === selectedLocation.display_name)) {
         setSuggestions([]);
         return;
       }
@@ -54,25 +57,52 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
     };
 
     fetchSuggestions();
-  }, [debouncedQuery]);
+  }, [debouncedQuery, selectedLocation]);
 
   const handleSuggestionClick = (suggestion: Suggestion) => {
+    setQuery(suggestion.display_name); // Keep full name in input for clarity
     setSelectedLocation(suggestion);
-    setQuery(suggestion.display_name);
     setSuggestions([]);
   };
+
+  // Reverse geocode to get address from lat/lng
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    setIsLoading(true);
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await response.json();
+        if (data && data.display_name) {
+            const newName = data.display_name;
+            setQuery(newName); // Update input with new address
+            onLocationSelect(lat, lng, newName);
+        }
+    } catch (error) {
+        console.error("Erro na geocodificação reversa:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível encontrar o endereço para esta localização.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  }, [onLocationSelect, toast]);
+
 
   const handleMapClick = useCallback((e: LeafletMouseEvent) => {
     const { lat, lng } = e.latlng;
     if (markerRef.current) {
         markerRef.current.setLatLng([lat, lng]);
     }
-    if (selectedLocation) {
-        onLocationSelect(lat, lng, selectedLocation.display_name);
-    }
-  }, [selectedLocation, onLocationSelect]);
+    reverseGeocode(lat, lng);
+  }, [reverseGeocode]);
 
+  const handleMarkerDragEnd = useCallback((e: L.DragEndEvent) => {
+    const { lat, lng } = e.target.getLatLng();
+    reverseGeocode(lat, lng);
+  }, [reverseGeocode]);
 
+  // Initialize and update map
   useEffect(() => {
     const L = LRef.current;
     if (!L) return;
@@ -91,8 +121,10 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
         shadowSize: [41, 41]
     });
 
-
     if (selectedLocation && mapContainerRef.current) {
+      const lat = parseFloat(selectedLocation.lat);
+      const lon = parseFloat(selectedLocation.lon);
+
       if (!mapRef.current) {
         const map = L.map(mapContainerRef.current);
         mapRef.current = map;
@@ -100,30 +132,31 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
         map.on('click', handleMapClick);
       }
       
-      const newPos: LatLngExpression = [parseFloat(selectedLocation.lat), parseFloat(selectedLocation.lon)];
-      mapRef.current.setView(newPos, 15);
+      const newPos: LatLngExpression = [lat, lon];
+      mapRef.current.setView(newPos, 16);
       
       if (markerRef.current) {
           markerRef.current.setLatLng(newPos);
       } else {
           const marker = L.marker(newPos, { icon: defaultIcon, draggable: true }).addTo(mapRef.current);
           markerRef.current = marker;
-
-          marker.on('dragend', (e) => {
-              const { lat, lng } = e.target.getLatLng();
-              onLocationSelect(lat, lng, selectedLocation.display_name);
-          });
+          marker.on('dragend', handleMarkerDragEnd);
       }
-      onLocationSelect(newPos[0], newPos[1], selectedLocation.display_name);
+      onLocationSelect(lat, lon, selectedLocation.display_name);
     }
     
     // Cleanup
     return () => {
         if(mapRef.current){
             mapRef.current.off('click', handleMapClick);
+            // Don't destroy the map, just remove listeners if needed.
+            // Full destruction handled by parent component unmount.
+        }
+        if (markerRef.current) {
+            markerRef.current.off('dragend', handleMarkerDragEnd);
         }
     }
-  }, [selectedLocation, onLocationSelect, handleMapClick]);
+  }, [selectedLocation, onLocationSelect, handleMapClick, handleMarkerDragEnd]);
 
 
   return (
@@ -132,7 +165,10 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
         <Input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if(selectedLocation) setSelectedLocation(null); // Allow new search
+          }}
           placeholder="Digite um endereço, bairro ou cidade..."
           className="pr-10"
         />
