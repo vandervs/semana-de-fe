@@ -31,32 +31,6 @@ const InitiativeInputSchema = z.object({
 
 export type InitiativeInput = z.infer<typeof InitiativeInputSchema>;
 
-const PhotoGenerationInputSchema = z.object({
-    testimony: z.string(),
-    photoDataUri: z.string().optional().describe(
-        "An optional photo of a plant, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-});
-
-const PhotoGenerationOutputSchema = z.object({
-    photoHint: z.string().describe("A short, two-word hint for an AI image generator based on the testimony and/or photo, like 'sorriso praia' or 'parque cidade'. Should be in Portuguese."),
-});
-
-
-const generatePhotoHint = ai.definePrompt({
-    name: 'generatePhotoHint',
-    input: { schema: PhotoGenerationInputSchema },
-    output: { schema: PhotoGenerationOutputSchema },
-    prompt: `Based on the following testimony (and photo, if provided), provide a two-word hint in Portuguese for an AI image generator to create a representative image.
-
-Testimony: {{{testimony}}}
-{{#if photoDataUri}}
-Photo: {{media url=photoDataUri}}
-{{/if}}
-`,
-});
-
-
 const submitInitiativeFlow = ai.defineFlow(
   {
     name: 'submitInitiativeFlow',
@@ -66,34 +40,20 @@ const submitInitiativeFlow = ai.defineFlow(
   async (input) => {
     
     let photoUrl = '';
-    let photoHint = 'abstrato moderno';
-    let photoDataUri: string | undefined = undefined;
+    // Use a generic hint since we are no longer processing the image with AI.
+    let photoHint = 'encontro pessoas';
 
     if (input.photo) {
         // In a real app, we would upload this to a storage bucket.
-        // For this demo, we'll convert it to a data URI to show in the testimony card
-        // and pass to the hint generator.
+        // For this demo, we'll convert it to a data URI to show in the testimony card.
         const arrayBuffer = await input.photo.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        photoDataUri = `data:${input.photo.type};base64,${buffer.toString('base64')}`;
-        photoUrl = photoDataUri;
-    }
-
-    const { output } = await generatePhotoHint({
-        testimony: input.testimony,
-        photoDataUri: photoDataUri
-    });
-    
-    if (output) {
-        photoHint = output.photoHint;
-    }
-    
-    // If no photo was uploaded, generate a placeholder URL.
-    if (!photoUrl) {
+        photoUrl = `data:${input.photo.type};base64,${buffer.toString('base64')}`;
+    } else {
+        // If no photo was uploaded, generate a random placeholder URL.
         const seed = Math.floor(Math.random() * 1000) + 1;
         photoUrl = `https://picsum.photos/seed/ev${seed}/600/400`;
     }
-
 
     const newInitiative: Omit<Initiative, 'id'> = {
         ...input,
