@@ -28,6 +28,7 @@ const interactionTypesMap: { [key: string]: string } = {
 };
 
 const getInteractionLabels = (types: string[]) => {
+    if (!types) return '';
     return types.map(t => interactionTypesMap[t]).join(', ');
 }
 
@@ -36,50 +37,63 @@ interface MapDisplayProps {
 }
 
 const MapDisplay: React.FC<MapDisplayProps> = ({ initiatives }) => {
-  const position: [number, number] = [-21.5, -45.0];
+  // Centered on RJ, MG, ES area.
+  const position: [number, number] = [-20.0, -42.5]; 
+  const zoomLevel = 7;
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<L.Marker[]>([]);
 
   useEffect(() => {
     if (mapContainerRef.current && !mapRef.current) {
-        const map = L.map(mapContainerRef.current).setView(position, 6);
+        const map = L.map(mapContainerRef.current).setView(position, zoomLevel);
         mapRef.current = map;
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+    }
 
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    if (mapRef.current && initiatives) {
         initiatives.forEach(initiative => {
-            const marker = L.marker([initiative.latitude, initiative.longitude]).addTo(map);
+            const marker = L.marker([initiative.latitude, initiative.longitude], { icon: defaultIcon }).addTo(mapRef.current!);
+            markersRef.current.push(marker);
             
             const evangelists = initiative.evangelists.map(p => p.name).join(', ');
             const evangelized = initiative.evangelized.map(p => p.name).join(', ');
 
             const popupContent = `
-                <div class="w-64">
+                <div class="w-64 p-1">
                     <h3 class="font-bold text-base mb-2 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 inline-block text-destructive"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                         ${initiative.locationName}
                     </h3>
-                    <div class="text-sm mb-2 capitalize font-medium">
+                    <div class="text-sm mb-2 capitalize font-medium text-muted-foreground">
                         ${getInteractionLabels(initiative.interactionTypes)}
                     </div>
-                    <p class="text-sm text-gray-500 mb-2 italic">"${initiative.testimony}"</p>
-                    <p class="text-xs text-right text-gray-500">- ${evangelists} com ${evangelized}</p>
+                    <p class="text-sm text-foreground mb-2 italic">"${initiative.testimony}"</p>
+                    <p class="text-xs text-right text-muted-foreground">- ${evangelists} com ${evangelized}</p>
                 </div>
             `;
             marker.bindPopup(popupContent);
         });
     }
 
+  }, [initiatives, position, zoomLevel]);
+  
+  // Cleanup function to run when the component unmounts
+  useEffect(() => {
     return () => {
         if (mapRef.current) {
-            mapRef.current.off();
             mapRef.current.remove();
             mapRef.current = null;
         }
     };
-  }, [initiatives, position]);
+  }, []);
 
   return (
     <div ref={mapContainerRef} className="h-full w-full z-0" />

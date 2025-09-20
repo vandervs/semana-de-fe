@@ -19,6 +19,10 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
     const markerRef = useRef<Marker | null>(null);
     const LRef = useRef<typeof import("leaflet") | null>(null);
 
+    const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
+    const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
+    const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
+
     useEffect(() => {
         import("leaflet").then(L => {
             LRef.current = L;
@@ -62,9 +66,6 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
         if (markerRef.current) {
             markerRef.current.setLatLng(newPos);
         } else if (mapRef.current) {
-            const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-            const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-            const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
 
             const defaultIcon: Icon<IconOptions> = L.icon({
                 iconUrl,
@@ -80,7 +81,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
             marker.on('dragend', handleMarkerDragEnd);
         }
         reverseGeocode(lat, lng);
-    }, [reverseGeocode]);
+    }, [reverseGeocode, handleMarkerDragEnd, iconUrl, iconRetinaUrl, shadowUrl]);
 
     const handleMarkerDragEnd = useCallback((e: any) => {
         const { lat, lng } = e.target.getLatLng();
@@ -91,8 +92,9 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
         const L = LRef.current;
         if (!L || !mapContainerRef.current || mapRef.current) return;
 
-        const southeastBrazil: LatLngExpression = [-21.5, -45.0];
-        const map = L.map(mapContainerRef.current).setView(southeastBrazil, 6);
+        // Centered on RJ, MG, ES area.
+        const targetArea: LatLngExpression = [-20.0, -42.5]; 
+        const map = L.map(mapContainerRef.current).setView(targetArea, 7);
         mapRef.current = map;
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
