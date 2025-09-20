@@ -82,7 +82,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
         reverseGeocode(lat, lng);
     }, [reverseGeocode]);
 
-    const handleMarkerDragEnd = useCallback((e: L.DragEndEvent) => {
+    const handleMarkerDragEnd = useCallback((e: any) => {
         const { lat, lng } = e.target.getLatLng();
         reverseGeocode(lat, lng);
     }, [reverseGeocode]);
@@ -110,8 +110,6 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
                 if (markerRef.current) {
                     markerRef.current.off('dragend', handleMarkerDragEnd);
                 }
-                // mapRef.current.remove(); // This might be too aggressive
-                // mapRef.current = null;
             }
         };
     }, [initializeMap, handleMapClick, handleMarkerDragEnd]);
