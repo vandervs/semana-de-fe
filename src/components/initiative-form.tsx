@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
-import { LocationSearch } from "./location-search";
+import { LocationPicker } from "./location-picker";
 import { cn } from "@/lib/utils";
 
 const personSchema = z.object({
@@ -30,7 +30,7 @@ const personSchema = z.object({
 });
 
 const formSchema = z.object({
-  locationName: z.string().min(3, { message: "A localização deve ter pelo menos 3 caracteres." }),
+  locationName: z.string().min(3, { message: "Selecione uma localização no mapa." }),
   latitude: z.number(),
   longitude: z.number(),
   evangelists: z.array(personSchema).min(1, "Adicione pelo menos um evangelista."),
@@ -190,16 +190,16 @@ export function InitiativeForm() {
                                 <FormItem>
                                     <FormLabel>Localização</FormLabel>
                                     <FormControl>
-                                         <LocationSearch 
-                                            onLocationSelect={(lat, lon, name) => {
+                                         <LocationPicker 
+                                            onLocationChange={(lat, lon, name) => {
                                                 form.setValue("latitude", lat);
                                                 form.setValue("longitude", lon);
-                                                form.setValue("locationName", name);
+                                                form.setValue("locationName", name, { shouldValidate: true });
                                             }}
                                          />
                                     </FormControl>
                                     <FormDescription>
-                                        Pesquise por um endereço e posicione o marcador no mapa.
+                                        Clique no mapa para posicionar o marcador e definir o local da iniciativa.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
