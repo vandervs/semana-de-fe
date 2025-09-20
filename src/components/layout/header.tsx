@@ -9,6 +9,7 @@ import { Menu, Waves } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
   { label: "Mapa", href: "/" },
@@ -18,6 +19,7 @@ const navItems = [
 export function Header() {
   const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -27,29 +29,30 @@ export function Header() {
             <Waves className="h-6 w-6 text-primary" />
             <span className="inline-block font-bold">Ecos do Evangelho</span>
           </Link>
-          <nav className="hidden gap-6 md:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm",
-                  pathname === item.href ? "text-foreground" : "text-foreground/60"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          {!isMobile && (
+              <nav className="hidden gap-6 md:flex">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm",
+                      pathname === item.href ? "text-foreground" : "text-foreground/60"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+          )}
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
-            <div className="hidden md:flex">
+            {!isMobile ? (
                 <Button asChild>
                     <Link href="/submit">Enviar Iniciativa</Link>
                 </Button>
-            </div>
-            <div className="md:hidden">
+            ) : (
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -79,7 +82,7 @@ export function Header() {
                     </nav>
                     </SheetContent>
                 </Sheet>
-            </div>
+            )}
         </div>
       </div>
     </header>
