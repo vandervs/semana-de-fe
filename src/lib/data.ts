@@ -8,10 +8,13 @@ export async function getInitiatives(): Promise<Initiative[]> {
     const initiativeSnapshot = await getDocs(q);
     const initiativeList = initiativeSnapshot.docs.map(doc => {
         const data = doc.data();
+        // Convert Firestore Timestamp to ISO string
+        const date = data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString();
         return {
             id: doc.id,
             ...data,
             date: data.date, 
+            createdAt: date,
         } as Initiative;
     });
     return initiativeList;

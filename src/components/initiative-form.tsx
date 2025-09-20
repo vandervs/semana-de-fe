@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -84,11 +85,13 @@ export function InitiativeForm() {
         try {
             await submitInitiative(values);
             setIsSuccess(true);
-            form.reset();
-
-            // Refresh the data on other pages
+            
+            // This revalidates the data on the server and fetches the new list
             router.refresh();
 
+            // Reset form after successful submission
+            form.reset();
+            
             setTimeout(() => {
                 setIsSuccess(false);
             }, 5000);
