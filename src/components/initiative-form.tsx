@@ -21,9 +21,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import { LocationSearch } from "./location-search";
 
 const formSchema = z.object({
   locationName: z.string().min(3, { message: "A localização deve ter pelo menos 3 caracteres." }),
+  latitude: z.number(),
+  longitude: z.number(),
   evangelizedName: z.string().min(2, { message: "O nome da pessoa deve ter pelo menos 2 caracteres." }),
   evangelistName: z.string().min(2, { message: "Seu nome deve ter pelo menos 2 caracteres." }),
   testimony: z.string().min(20, { message: "O testemunho deve ter pelo menos 20 caracteres." }).max(500, { message: "O testemunho não pode exceder 500 caracteres."}),
@@ -94,17 +97,23 @@ export function InitiativeForm() {
                             />
                         </div>
 
-                        <FormField
+                         <FormField
                             control={form.control}
                             name="locationName"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Localização</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="ex: São Paulo, SP" {...field} />
+                                         <LocationSearch 
+                                            onLocationSelect={(lat, lon, name) => {
+                                                form.setValue("latitude", lat);
+                                                form.setValue("longitude", lon);
+                                                form.setValue("locationName", name);
+                                            }}
+                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Por favor, forneça a cidade e o estado.
+                                        Pesquise por um endereço e posicione o marcador no mapa.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
