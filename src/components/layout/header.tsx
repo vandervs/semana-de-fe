@@ -27,7 +27,7 @@ export function Header() {
         <div className="flex gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <Waves className="h-6 w-6 text-primary" />
-            <span className="inline-block font-bold">Ecos do Evangelho</span>
+            <span className="inline-block font-bold">Semana de Fé</span>
           </Link>
           {!isMobile && (
               <nav className="hidden gap-6 md:flex">
@@ -63,7 +63,7 @@ export function Header() {
                     <SheetContent side="right">
                     <Link href="/" className="mb-8 flex items-center" onClick={() => setIsSheetOpen(false)}>
                         <Waves className="mr-2 h-6 w-6 text-primary" />
-                        <span className="font-bold">Ecos do Evangelho</span>
+                        <span className="font-bold">Semana de Fé</span>
                     </Link>
                     <nav className="flex flex-col gap-6">
                         {[...navItems, {label: "Enviar Iniciativa", href: "/submit"}].map((item) => (

@@ -1,10 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Ecos do Evangelho',
+  title: 'Semana de Fé',
   description: 'Mapeando iniciativas de evangelismo no Sudeste do Brasil.',
 };
 
