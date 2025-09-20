@@ -10,7 +10,6 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { addInitiative } from '@/lib/data';
 import type { Initiative } from '@/lib/definitions';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const PersonSchema = z.object({
     name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
@@ -27,17 +26,20 @@ const InitiativeInputSchema = z.object({
   interactionTypes: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "Você precisa selecionar pelo menos um tipo de interação.",
   }),
-  photo: z.any().optional(),
+  photo: z.instanceof(File).optional(),
 });
 
 export type InitiativeInput = z.infer<typeof InitiativeInputSchema>;
 
 const PhotoGenerationInputSchema = z.object({
     testimony: z.string(),
+    photoDataUri: z.string().optional().describe(
+        "An optional photo of a plant, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 
 const PhotoGenerationOutputSchema = z.object({
-    photoHint: z.string().describe("A short, two-word hint for an AI image generator based on the testimony, like 'sorriso praia' or 'parque cidade'."),
+    photoHint: z.string().describe("A short, two-word hint for an AI image generator based on the testimony and/or photo, like 'sorriso praia' or 'parque cidade'. Should be in Portuguese."),
 });
 
 
@@ -45,9 +47,12 @@ const generatePhotoHint = ai.definePrompt({
     name: 'generatePhotoHint',
     input: { schema: PhotoGenerationInputSchema },
     output: { schema: PhotoGenerationOutputSchema },
-    prompt: `Based on the following testimony, provide a two-word hint for an AI image generator to create a representative image. The hint should be in Portuguese.
+    prompt: `Based on the following testimony (and photo, if provided), provide a two-word hint in Portuguese for an AI image generator to create a representative image.
 
 Testimony: {{{testimony}}}
+{{#if photoDataUri}}
+Photo: {{media url=photoDataUri}}
+{{/if}}
 `,
 });
 
@@ -62,24 +67,33 @@ const submitInitiativeFlow = ai.defineFlow(
     
     let photoUrl = '';
     let photoHint = 'abstrato moderno';
+    let photoDataUri: string | undefined = undefined;
 
-    // Check if a photo was uploaded. The `photo` property will be a FileList-like object.
-    if (input.photo && typeof input.photo === 'object' && input.photo.length > 0) {
-        // In a real app, you would upload the file to a storage bucket
-        // and get a public URL. For now, we'll find a random placeholder.
-        const randomIndex = Math.floor(Math.random() * PlaceHolderImages.length);
-        const randomImage = PlaceHolderImages[randomIndex];
-        photoUrl = randomImage.imageUrl;
-        photoHint = randomImage.imageHint;
-    } else {
-        const { output } = await generatePhotoHint({testimony: input.testimony});
-        if (output) {
-            photoHint = output.photoHint;
-        }
-       
+    if (input.photo) {
+        // In a real app, we would upload this to a storage bucket.
+        // For this demo, we'll convert it to a data URI to show in the testimony card
+        // and pass to the hint generator.
+        const arrayBuffer = await input.photo.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        photoDataUri = `data:${input.photo.type};base64,${buffer.toString('base64')}`;
+        photoUrl = photoDataUri;
+    }
+
+    const { output } = await generatePhotoHint({
+        testimony: input.testimony,
+        photoDataUri: photoDataUri
+    });
+    
+    if (output) {
+        photoHint = output.photoHint;
+    }
+    
+    // If no photo was uploaded, generate a placeholder URL.
+    if (!photoUrl) {
         const seed = Math.floor(Math.random() * 1000) + 1;
         photoUrl = `https://picsum.photos/seed/ev${seed}/600/400`;
     }
+
 
     const newInitiative: Omit<Initiative, 'id'> = {
         ...input,

@@ -44,7 +44,7 @@ const formSchema = z.object({
   interactionTypes: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "Você precisa selecionar pelo menos um tipo de interação.",
   }),
-  photo: z.any().optional(),
+  photo: z.instanceof(File).optional(),
 });
 
 const interactionTypesItems = [
@@ -307,7 +307,7 @@ export function InitiativeForm() {
                                 <FormItem>
                                     <FormLabel>Foto (Opcional)</FormLabel>
                                     <FormControl>
-                                        <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
+                                        <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files ? e.target.files[0] : null)} />
                                     </FormControl>
                                     <FormDescription>
                                         Uma foto do momento ou do lugar. Se não for enviada, uma imagem será gerada por IA.
