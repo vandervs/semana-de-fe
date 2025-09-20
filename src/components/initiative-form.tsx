@@ -60,8 +60,8 @@ export function InitiativeForm() {
         defaultValues: {
             locationName: "",
             testimony: "",
-            evangelists: [{ name: "" }],
-            evangelized: [{ name: "" }],
+            evangelists: [{ name: "", contact: "" }],
+            evangelized: [{ name: "", contact: "" }],
             interactionTypes: [],
         },
     });
@@ -147,7 +147,7 @@ export function InitiativeForm() {
                                     )}
                                 </div>
                             ))}
-                            <Button type="button" variant="outline" size="sm" onClick={() => appendEvangelist({ name: "" })}>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendEvangelist({ name: "", contact: "" })}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Adicionar evangelista
                             </Button>
@@ -192,7 +192,7 @@ export function InitiativeForm() {
                                     )}
                                 </div>
                             ))}
-                             <Button type="button" variant="outline" size="sm" onClick={() => appendEvangelized({ name: "" })}>
+                             <Button type="button" variant="outline" size="sm" onClick={() => appendEvangelized({ name: "", contact: "" })}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Adicionar pessoa
                             </Button>
