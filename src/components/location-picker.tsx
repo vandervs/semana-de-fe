@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
@@ -56,6 +57,11 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
         }
     }, [onLocationChange, toast]);
 
+    const handleMarkerDragEnd = useCallback((e: any) => {
+        const { lat, lng } = e.target.getLatLng();
+        reverseGeocode(lat, lng);
+    }, [reverseGeocode]);
+
     const handleMapClick = useCallback((e: LeafletMouseEvent) => {
         const L = LRef.current;
         if (!L) return;
@@ -82,11 +88,6 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
         }
         reverseGeocode(lat, lng);
     }, [reverseGeocode, handleMarkerDragEnd, iconUrl, iconRetinaUrl, shadowUrl]);
-
-    const handleMarkerDragEnd = useCallback((e: any) => {
-        const { lat, lng } = e.target.getLatLng();
-        reverseGeocode(lat, lng);
-    }, [reverseGeocode]);
 
     const initializeMap = useCallback(() => {
         const L = LRef.current;
