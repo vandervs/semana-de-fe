@@ -1,13 +1,7 @@
-import dynamic from 'next/dynamic';
 import { mockInitiatives } from '@/lib/data';
-import { Skeleton } from '@/components/ui/skeleton';
+import { MapLoader } from '@/components/map-loader';
 
 export default function Home() {
-  const MapDisplay = dynamic(() => import('@/components/map-display'), {
-    ssr: false,
-    loading: () => <Skeleton className="h-full w-full" />,
-  });
-
   const initiatives = mockInitiatives;
 
   return (
@@ -23,7 +17,7 @@ export default function Home() {
           </div>
         </div>
         <div className="mt-8 h-[60vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden md:h-[70vh]">
-            <MapDisplay initiatives={initiatives} />
+            <MapLoader initiatives={initiatives} />
         </div>
     </section>
   );
