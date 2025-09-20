@@ -3,21 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
-import L from "leaflet";
-
-const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
-
-const defaultIcon = L.icon({
-    iconUrl,
-    iconRetinaUrl,
-    shadowUrl,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
+import type { Map, Marker, Icon, IconOptions, LatLngExpression, LeafletMouseEvent } from "leaflet";
 
 type Suggestion = {
   place_id: number;
@@ -39,8 +25,16 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
   const debouncedQuery = useDebounce(query, 500);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<Map | null>(null);
+  const markerRef = useRef<Marker | null>(null);
+  const LRef = useRef<typeof import("leaflet") | null>(null);
+
+  useEffect(() => {
+    // Import Leaflet dynamically on the client side
+    import("leaflet").then(L => {
+        LRef.current = L;
+    });
+  }, []);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -68,22 +62,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
     setSuggestions([]);
   };
 
-  const MapEvents = ({ onMapClick }: { onMapClick: (e: L.LeafletMouseEvent) => void }) => {
-    const map = mapRef.current;
-    useEffect(() => {
-        if (map) {
-            map.on('click', onMapClick);
-        }
-        return () => {
-            if (map) {
-                map.off('click', onMapClick);
-            }
-        }
-    }, [map, onMapClick]);
-    return null;
-  }
-
-  const handleMapClick = useCallback((e: L.LeafletMouseEvent) => {
+  const handleMapClick = useCallback((e: LeafletMouseEvent) => {
     const { lat, lng } = e.latlng;
     if (markerRef.current) {
         markerRef.current.setLatLng([lat, lng]);
@@ -95,14 +74,33 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
 
 
   useEffect(() => {
+    const L = LRef.current;
+    if (!L) return;
+
+    const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
+    const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
+    const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
+
+    const defaultIcon: Icon<IconOptions> = L.icon({
+        iconUrl,
+        iconRetinaUrl,
+        shadowUrl,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+
     if (selectedLocation && mapContainerRef.current) {
       if (!mapRef.current) {
         const map = L.map(mapContainerRef.current);
         mapRef.current = map;
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        map.on('click', handleMapClick);
       }
       
-      const newPos: [number, number] = [parseFloat(selectedLocation.lat), parseFloat(selectedLocation.lon)];
+      const newPos: LatLngExpression = [parseFloat(selectedLocation.lat), parseFloat(selectedLocation.lon)];
       mapRef.current.setView(newPos, 15);
       
       if (markerRef.current) {
@@ -121,13 +119,11 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
     
     // Cleanup
     return () => {
-      if (mapRef.current && !selectedLocation) {
-        mapRef.current.remove();
-        mapRef.current = null;
-        markerRef.current = null;
-      }
+        if(mapRef.current){
+            mapRef.current.off('click', handleMapClick);
+        }
     }
-  }, [selectedLocation, onLocationSelect]);
+  }, [selectedLocation, onLocationSelect, handleMapClick]);
 
 
   return (
@@ -159,7 +155,6 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
       {selectedLocation && (
         <div className="h-64 w-full rounded-md border overflow-hidden">
             <div ref={mapContainerRef} className="h-full w-full" />
-            {mapRef.current && <MapEvents onMapClick={handleMapClick} />}
         </div>
       )}
     </div>
