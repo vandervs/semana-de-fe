@@ -63,7 +63,8 @@ const submitInitiativeFlow = ai.defineFlow(
     let photoUrl = '';
     let photoHint = 'abstrato moderno';
 
-    if (input.photo && input.photo.length > 0) {
+    // Check if a photo was uploaded. The `photo` property will be a FileList-like object.
+    if (input.photo && typeof input.photo === 'object' && input.photo.length > 0) {
         // In a real app, you would upload the file to a storage bucket
         // and get a public URL. For now, we'll find a random placeholder.
         const randomIndex = Math.floor(Math.random() * PlaceHolderImages.length);
@@ -71,7 +72,7 @@ const submitInitiativeFlow = ai.defineFlow(
         photoUrl = randomImage.imageUrl;
         photoHint = randomImage.imageHint;
     } else {
-         const { output } = await generatePhotoHint({testimony: input.testimony});
+        const { output } = await generatePhotoHint({testimony: input.testimony});
         if (output) {
             photoHint = output.photoHint;
         }
