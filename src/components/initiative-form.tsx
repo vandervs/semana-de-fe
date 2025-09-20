@@ -23,6 +23,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle } from "lucide-react";
 import { LocationPicker } from "./location-picker";
 import { cn } from "@/lib/utils";
+import { submitInitiative } from "@/ai/flows/submitInitiative";
+import { useToast } from "@/hooks/use-toast";
+
 
 const personSchema = z.object({
     name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
@@ -50,6 +53,7 @@ const interactionTypesItems = [
 
 export function InitiativeForm() {
     const [isSuccess, setIsSuccess] = React.useState(false);
+    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -75,12 +79,23 @@ export function InitiativeForm() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log("Formulário enviado:", values);
         
-        setIsSuccess(true);
-        form.reset();
+        try {
+            await submitInitiative(values);
+            setIsSuccess(true);
+            form.reset();
 
-        setTimeout(() => {
-            setIsSuccess(false);
-        }, 5000);
+            setTimeout(() => {
+                setIsSuccess(false);
+            }, 5000);
+
+        } catch(error) {
+            console.error("Erro ao enviar iniciativa:", error);
+            toast({
+                variant: "destructive",
+                title: "Erro ao Enviar",
+                description: "Ocorreu um erro ao enviar sua iniciativa. Por favor, tente novamente.",
+            });
+        }
     }
 
     return (

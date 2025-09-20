@@ -3,11 +3,24 @@
 
 import { mockInitiatives } from '@/lib/data';
 import dynamic from 'next/dynamic';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Initiative } from '@/lib/definitions';
 
 export default function Home() {
-  const initiatives = mockInitiatives;
+  const [initiatives, setInitiatives] = useState<Initiative[]>(mockInitiatives);
+
+  useEffect(() => {
+    // This is a workaround to update the initiatives when the mock data changes.
+    // In a real app, you would fetch this data from an API.
+    const interval = setInterval(() => {
+      if (initiatives.length !== mockInitiatives.length) {
+        setInitiatives([...mockInitiatives]);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [initiatives.length]);
+
 
   const MapDisplay = useMemo(() => dynamic(() => import('@/components/map-display'), {
     ssr: false,

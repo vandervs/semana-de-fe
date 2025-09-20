@@ -67,3 +67,7 @@ export const mockInitiatives: Initiative[] = [
     date: '2024-07-23',
   }
 ];
+
+export function addInitiative(initiative: Initiative) {
+    mockInitiatives.unshift(initiative);
+}
