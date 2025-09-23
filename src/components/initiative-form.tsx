@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
-import { MessageCircle, BookOpen, UserCheck, PlusCircle, X, Building2, Wrench } from "lucide-react";
+import { MessageCircle, BookOpen, UserCheck, PlusCircle, X, Building2, Wrench, Users, UserPlus, MapPin, PenSquare, Camera } from "lucide-react";
 import React from "react";
 import { useRouter } from 'next/navigation';
 
@@ -131,7 +131,10 @@ export function InitiativeForm() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                         
                         <div className="space-y-4">
-                            <FormLabel>Evangelistas</FormLabel>
+                            <FormLabel className="flex items-center">
+                                <Users className="mr-2 h-5 w-5 text-muted-foreground" />
+                                Evangelistas
+                            </FormLabel>
                             {evangelistsFields.map((field, index) => (
                                 <div key={field.id} className="flex items-end gap-2">
                                     <div className="grid grid-cols-2 gap-2 flex-1">
@@ -193,7 +196,10 @@ export function InitiativeForm() {
                         />
 
                         <div className="space-y-4">
-                            <FormLabel>Pessoas Evangelizadas</FormLabel>
+                            <FormLabel className="flex items-center">
+                                <UserPlus className="mr-2 h-5 w-5 text-muted-foreground" />
+                                Pessoas Evangelizadas
+                            </FormLabel>
                             {evangelizedFields.map((field, index) => (
                                 <div key={field.id} className="flex items-end gap-2">
                                     <div className="grid grid-cols-2 gap-2 flex-1">
@@ -242,7 +248,10 @@ export function InitiativeForm() {
                             name="locationName"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Localização</FormLabel>
+                                    <FormLabel className="flex items-center">
+                                        <MapPin className="mr-2 h-5 w-5 text-muted-foreground" />
+                                        Localização
+                                    </FormLabel>
                                     <FormControl>
                                          <LocationPicker 
                                             onLocationChange={(lat, lon, name) => {
@@ -265,7 +274,10 @@ export function InitiativeForm() {
                             name="testimony"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Testemunho</FormLabel>
+                                    <FormLabel className="flex items-center">
+                                        <PenSquare className="mr-2 h-5 w-5 text-muted-foreground" />
+                                        Testemunho
+                                    </FormLabel>
                                     <FormControl>
                                         <Textarea
                                             placeholder="Compartilhe um breve testemunho de como foi..."
@@ -390,7 +402,10 @@ export function InitiativeForm() {
                             name="photo"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Foto (Opcional)</FormLabel>
+                                    <FormLabel className="flex items-center">
+                                        <Camera className="mr-2 h-5 w-5 text-muted-foreground" />
+                                        Foto (Opcional)
+                                    </FormLabel>
                                     <FormControl>
                                         <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files ? e.target.files[0] : null)} />
                                     </FormControl>
