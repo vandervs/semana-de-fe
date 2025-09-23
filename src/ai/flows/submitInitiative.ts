@@ -120,7 +120,7 @@ const submitInitiativeFlow = ai.defineFlow(
         ...input,
         date: new Date().toISOString().split('T')[0],
         interactionTypes: input.interactionTypes as any,
-        photoUrl,
+        photoUrl: photoUrl, // Use the potentially uploaded URL
         photoHint: 'encontro pessoas', // Generic hint for now
     };
     
