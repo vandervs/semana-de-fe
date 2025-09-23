@@ -44,21 +44,12 @@ const submitInitiativeFlow = ai.defineFlow(
   },
   async (input) => {
     
-    let photoUrl = '';
     // Use a generic hint since we are no longer processing the image with AI.
     let photoHint = 'encontro pessoas';
 
-    if (input.photo) {
-        // In a real app, we would upload this to a storage bucket.
-        // For this demo, we'll convert it to a data URI to show in the testimony card.
-        const arrayBuffer = await input.photo.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        photoUrl = `data:${input.photo.type};base64,${buffer.toString('base64')}`;
-    } else {
-        // If no photo was uploaded, generate a random placeholder URL.
-        const seed = Math.floor(Math.random() * 1000) + 1;
-        photoUrl = `https://picsum.photos/seed/ev${seed}/600/400`;
-    }
+    // If no photo was uploaded, generate a random placeholder URL.
+    const seed = Math.floor(Math.random() * 1000) + 1;
+    const photoUrl = `https://picsum.photos/seed/ev${seed}/600/400`;
 
     const newInitiative: Omit<Initiative, 'id'> = {
         ...input,
