@@ -7,6 +7,7 @@ import * as z from "zod";
 import { MessageCircle, BookOpen, UserCheck, PlusCircle, X, Building2, Wrench, Users, UserPlus, MapPin, PenSquare, Camera } from "lucide-react";
 import React from "react";
 import { useRouter } from 'next/navigation';
+import imageCompression from 'browser-image-compression';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +45,7 @@ const formSchema = z.object({
   interactionTypes: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "Você precisa selecionar pelo menos um tipo de interação.",
   }),
-  photo: z.instanceof(File).optional(),
+  photo: z.any().optional(),
   university: z.string().min(2, { message: "Por favor, insira o nome da universidade." }),
   evangelismTools: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "Você precisa selecionar pelo menos uma ferramenta.",
@@ -93,11 +94,49 @@ export function InitiativeForm() {
         name: "evangelized",
     });
 
+    async function compressImage(file: File): Promise<File> {
+        const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+        };
+        try {
+            console.log(`Tamanho original da imagem: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+            const compressedFile = await imageCompression(file, options);
+            console.log(`Tamanho da imagem comprimida: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+            return compressedFile;
+        } catch (error) {
+            console.error('Erro na compressão da imagem:', error);
+            toast({
+                variant: "destructive",
+                title: "Erro de Compressão",
+                description: "Não foi possível comprimir a imagem. Tente uma imagem menor.",
+            });
+            // Return original file if compression fails
+            return file;
+        }
+    }
+
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log("Formulário enviado:", values);
         
+        const submissionValues = { ...values };
+
+        if (submissionValues.photo && submissionValues.photo instanceof File) {
+            if (submissionValues.photo.size > 1 * 1024 * 1024) { // 1MB
+                try {
+                    submissionValues.photo = await compressImage(submissionValues.photo);
+                } catch (error) {
+                    // Error is already toasted in compressImage function
+                    return;
+                }
+            }
+        }
+
+
         try {
-            await submitInitiative(values);
+            await submitInitiative(submissionValues);
             setIsSuccess(true);
             
             // This revalidates the data on the server and fetches the new list
@@ -407,7 +446,7 @@ export function InitiativeForm() {
                                         <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files ? e.target.files[0] : null)} />
                                     </FormControl>
                                     <FormDescription>
-                                        Uma foto do momento ou do lugar. Se não for enviada, uma imagem será gerada por IA.
+                                        Uma foto do momento ou do lugar. Imagens maiores que 1MB serão comprimidas.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -430,5 +469,3 @@ export function InitiativeForm() {
         </Card>
     );
 }
-
-    
