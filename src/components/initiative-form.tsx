@@ -262,7 +262,7 @@ export function InitiativeForm() {
                                          />
                                     </FormControl>
                                     <FormDescription>
-                                        Clique no mapa para posicionar o marcador e definir o local da iniciativa.
+                                        Pesquise por um endereço ou mova o pino no mapa para definir a localização.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
