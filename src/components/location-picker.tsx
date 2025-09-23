@@ -33,35 +33,22 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
     const mapRef = useRef<Map | null>(null);
     const markerRef = useRef<Marker | null>(null);
     const LRef = useRef<typeof import("leaflet") | null>(null);
-
-    const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-    const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-    const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
-    
-    const defaultIcon: Icon<IconOptions> | undefined = LRef.current?.icon({
-        iconUrl,
-        iconRetinaUrl,
-        shadowUrl,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
+    const defaultIconRef = useRef<Icon<IconOptions> | null>(null);
 
     const placeMarker = useCallback((lat: number, lng: number) => {
         const L = LRef.current;
-        if (!L || !mapRef.current) return;
+        if (!L || !mapRef.current || !defaultIconRef.current) return;
         
         const newPos: LatLngExpression = [lat, lng];
         
         if (markerRef.current) {
             markerRef.current.setLatLng(newPos);
         } else {
-            markerRef.current = L.marker(newPos, { icon: defaultIcon, draggable: true }).addTo(mapRef.current);
+            markerRef.current = L.marker(newPos, { icon: defaultIconRef.current, draggable: true }).addTo(mapRef.current);
             markerRef.current.on('dragend', handleMarkerDragEnd);
         }
         mapRef.current.setView(newPos, 16);
-    }, [defaultIcon]);
+    }, []);
 
     const reverseGeocode = useCallback(async (lat: number, lng: number) => {
         setIsReverseGeocoding(true);
@@ -107,6 +94,21 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
             if (!isMounted || !mapContainerRef.current) return;
 
             LRef.current = L;
+
+            const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
+            const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
+            const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
+            
+            defaultIconRef.current = L.icon({
+                iconUrl,
+                iconRetinaUrl,
+                shadowUrl,
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
 
             if (!mapRef.current) {
                 // Centered on RJ, MG, ES area.
@@ -187,7 +189,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
             />
             {isSearching && <p className="text-sm text-muted-foreground p-2">Buscando...</p>}
             {!isSearching && searchResults.length > 0 && (
-                 <div className="absolute top-full left-0 right-0 z-[1000] bg-card border rounded-md shadow-lg mt-1">
+                 <div className="absolute top-full left-0 right-0 z-[1001] bg-card border rounded-md shadow-lg mt-1">
                     {searchResults.map(result => (
                         <Button
                             key={result.place_id}
