@@ -66,6 +66,17 @@ const evangelismToolsItems = [
     { id: "outros", label: "Outros" },
 ];
 
+async function fileToDataUri(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 export function InitiativeForm() {
     const [isSuccess, setIsSuccess] = React.useState(false);
     const { toast } = useToast();
@@ -121,16 +132,23 @@ export function InitiativeForm() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log("Formulário enviado:", values);
         
-        const submissionValues = { ...values };
+        const submissionValues: any = { ...values };
 
-        if (submissionValues.photo && submissionValues.photo instanceof File) {
-            if (submissionValues.photo.size > 1 * 1024 * 1024) { // 1MB
-                try {
-                    submissionValues.photo = await compressImage(submissionValues.photo);
-                } catch (error) {
-                    // Error is already toasted in compressImage function
-                    return;
+        if (values.photo && values.photo instanceof File) {
+            try {
+                let imageFile = values.photo;
+                if (imageFile.size > 1 * 1024 * 1024) { // 1MB
+                   imageFile = await compressImage(imageFile);
                 }
+                submissionValues.photo = await fileToDataUri(imageFile);
+            } catch (error) {
+                console.error("Erro ao processar imagem:", error);
+                toast({
+                    variant: "destructive",
+                    title: "Erro de Imagem",
+                    description: "Não foi possível processar a imagem. Tente novamente.",
+                });
+                return;
             }
         }
 
