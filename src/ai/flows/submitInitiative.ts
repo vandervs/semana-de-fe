@@ -27,6 +27,10 @@ const InitiativeInputSchema = z.object({
     message: "Você precisa selecionar pelo menos um tipo de interação.",
   }),
   photo: z.instanceof(File).optional(),
+  university: z.string().min(2, { message: "Por favor, insira o nome da universidade." }),
+  evangelismTools: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: "Você precisa selecionar pelo menos uma ferramenta.",
+  }),
 });
 
 export type InitiativeInput = z.infer<typeof InitiativeInputSchema>;

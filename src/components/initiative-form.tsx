@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
-import { MessageCircle, BookOpen, UserCheck, PlusCircle, X } from "lucide-react";
+import { MessageCircle, BookOpen, UserCheck, PlusCircle, X, Building2, Wrench } from "lucide-react";
 import React from "react";
 import { useRouter } from 'next/navigation';
 
@@ -45,13 +45,25 @@ const formSchema = z.object({
     message: "Você precisa selecionar pelo menos um tipo de interação.",
   }),
   photo: z.instanceof(File).optional(),
+  university: z.string().min(2, { message: "Por favor, insira o nome da universidade." }),
+  evangelismTools: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: "Você precisa selecionar pelo menos uma ferramenta.",
+  }),
 });
 
 const interactionTypesItems = [
     { id: "conversation", label: "Conversa Espiritual", icon: MessageCircle },
     { id: "presentation", label: "Apresentação do Evangelho", icon: BookOpen },
     { id: "acceptance", label: "Aceitou a Cristo", icon: UserCheck },
-]
+];
+
+const evangelismToolsItems = [
+    { id: "god-tools", label: "God Tools App" },
+    { id: "conecta", label: "Conecta" },
+    { id: "perspectiva", label: "Perspectiva" },
+    { id: "4-leis", label: "4 Leis Espirituais" },
+    { id: "outros", label: "Outros" },
+];
 
 export function InitiativeForm() {
     const [isSuccess, setIsSuccess] = React.useState(false);
@@ -66,6 +78,8 @@ export function InitiativeForm() {
             evangelists: [{ name: "", contact: "" }],
             evangelized: [{ name: "", contact: "" }],
             interactionTypes: [],
+            university: "",
+            evangelismTools: [],
         },
     });
     
@@ -161,6 +175,23 @@ export function InitiativeForm() {
                             </Button>
                         </div>
                         
+                        <FormField
+                            control={form.control}
+                            name="university"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="flex items-center">
+                                        <Building2 className="mr-2 h-5 w-5 text-muted-foreground" />
+                                        Universidade
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="ex: UFRJ, USP, etc." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         <div className="space-y-4">
                             <FormLabel>Pessoas Evangelizadas</FormLabel>
                             {evangelizedFields.map((field, index) => (
@@ -287,6 +318,60 @@ export function InitiativeForm() {
                                                             </FormControl>
                                                             <FormLabel className="font-normal flex items-center">
                                                                 <item.icon className="mr-2 h-5 w-5 text-muted-foreground" />
+                                                                {item.label}
+                                                            </FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="evangelismTools"
+                            render={() => (
+                                <FormItem>
+                                    <div className="mb-4">
+                                        <FormLabel className="flex items-center">
+                                            <Wrench className="mr-2 h-5 w-5 text-muted-foreground" />
+                                            Ferramentas de Evangelismo Usadas
+                                        </FormLabel>
+                                        <FormDescription>
+                                            Selecione todas as ferramentas que você utilizou.
+                                        </FormDescription>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                                        {evangelismToolsItems.map((item) => (
+                                            <FormField
+                                                key={item.id}
+                                                control={form.control}
+                                                name="evangelismTools"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-start space-x-3 space-y-0"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(item.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, item.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== item.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal">
                                                                 {item.label}
                                                             </FormLabel>
                                                         </FormItem>
