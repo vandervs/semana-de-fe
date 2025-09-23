@@ -7,6 +7,7 @@ import type { Map, Marker, Icon, IconOptions, LatLngExpression, LeafletMouseEven
 import { Skeleton } from "./ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "./ui/button";
+import { FormDescription } from "./ui/form";
 
 type LocationPickerProps = {
     onLocationChange: (lat: number, lon: number, name: string) => void;
@@ -186,7 +187,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
             />
             {isSearching && <p className="text-sm text-muted-foreground p-2">Buscando...</p>}
             {!isSearching && searchResults.length > 0 && (
-                 <div className="absolute top-full left-0 right-0 z-50 bg-card border rounded-md shadow-lg mt-1">
+                 <div className="absolute top-full left-0 right-0 z-[1000] bg-card border rounded-md shadow-lg mt-1">
                     {searchResults.map(result => (
                         <Button
                             key={result.place_id}
@@ -199,6 +200,9 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
                     ))}
                  </div>
             )}
+            <FormDescription className="pt-2">
+                Pesquise por um endereço ou mova o pino no mapa para definir a localização.
+            </FormDescription>
             <div className="h-80 w-full rounded-md border overflow-hidden relative mt-2">
                 <div ref={mapContainerRef} className="h-full w-full" />
                  {isReverseGeocoding && (

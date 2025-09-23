@@ -261,9 +261,6 @@ export function InitiativeForm() {
                                             }}
                                          />
                                     </FormControl>
-                                    <FormDescription>
-                                        Pesquise por um endereço ou mova o pino no mapa para definir a localização.
-                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
