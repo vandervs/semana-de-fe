@@ -185,7 +185,7 @@ export function InitiativeForm() {
                                 <FormItem>
                                     <FormLabel className="flex items-center">
                                         <Building2 className="mr-2 h-5 w-5 text-muted-foreground" />
-                                        Universidade
+                                        Universidade e Campus
                                     </FormLabel>
                                     <FormControl>
                                         <Input placeholder="ex: UFRJ, USP, etc." {...field} />
