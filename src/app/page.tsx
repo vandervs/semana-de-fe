@@ -28,9 +28,32 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const peopleReached = useMemo(() => {
-    return initiatives.reduce((acc, initiative) => acc + initiative.evangelized.length, 0);
+  const { peopleReached, conversations, presentations, acceptances } = useMemo(() => {
+    const stats = {
+      peopleReached: 0,
+      conversations: 0,
+      presentations: 0,
+      acceptances: 0,
+    };
+
+    initiatives.forEach(initiative => {
+      const evangelizedCount = initiative.evangelized.length;
+      stats.peopleReached += evangelizedCount;
+
+      if (initiative.interactionTypes.includes('conversation')) {
+        stats.conversations += evangelizedCount;
+      }
+      if (initiative.interactionTypes.includes('presentation')) {
+        stats.presentations += evangelizedCount;
+      }
+      if (initiative.interactionTypes.includes('acceptance')) {
+        stats.acceptances += evangelizedCount;
+      }
+    });
+
+    return stats;
   }, [initiatives]);
+
 
   const MapDisplay = useMemo(() => dynamic(() => import('@/components/map-display'), {
     ssr: false,
@@ -69,7 +92,12 @@ export default function Home() {
                     Veja o evangelho se espalhando pelo Sudeste do Brasil.
                 </p>
             </div>
-            <ProgressDisplay peopleReached={peopleReached} />
+            <ProgressDisplay 
+              peopleReached={peopleReached}
+              conversations={conversations}
+              presentations={presentations}
+              acceptances={acceptances}
+            />
         </div>
         <div className="relative col-span-2 h-[80vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden z-0">
             <MapDisplay initiatives={initiatives} />
