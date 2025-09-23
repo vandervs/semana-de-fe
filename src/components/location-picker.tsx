@@ -5,14 +5,27 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import type { Map, Marker, Icon, IconOptions, LatLngExpression, LeafletMouseEvent } from "leaflet";
 import { Skeleton } from "./ui/skeleton";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Button } from "./ui/button";
 
 type LocationPickerProps = {
     onLocationChange: (lat: number, lon: number, name: string) => void;
 };
 
+type SearchResult = {
+    place_id: number;
+    lat: string;
+    lon: string;
+    display_name: string;
+};
+
 export function LocationPicker({ onLocationChange }: LocationPickerProps) {
-    const [address, setAddress] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
+    
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
     const { toast } = useToast();
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -23,18 +36,43 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
     const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
     const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
     const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
+    
+    const defaultIcon: Icon<IconOptions> | undefined = LRef.current?.icon({
+        iconUrl,
+        iconRetinaUrl,
+        shadowUrl,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const placeMarker = useCallback((lat: number, lng: number) => {
+        const L = LRef.current;
+        if (!L || !mapRef.current) return;
+        
+        const newPos: LatLngExpression = [lat, lng];
+        
+        if (markerRef.current) {
+            markerRef.current.setLatLng(newPos);
+        } else {
+            markerRef.current = L.marker(newPos, { icon: defaultIcon, draggable: true }).addTo(mapRef.current);
+            markerRef.current.on('dragend', handleMarkerDragEnd);
+        }
+        mapRef.current.setView(newPos, 16);
+    }, [defaultIcon]);
 
     const reverseGeocode = useCallback(async (lat: number, lng: number) => {
-        setIsLoading(true);
+        setIsReverseGeocoding(true);
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
             const data = await response.json();
             if (data && data.display_name) {
                 const newName = data.display_name;
-                setAddress(newName);
+                setSearchQuery(newName); // Update input field with the address
                 onLocationChange(lat, lng, newName);
             } else {
-                 setAddress("Endereço não encontrado.");
+                 setSearchQuery("Endereço não encontrado.");
                  onLocationChange(lat, lng, "");
             }
         } catch (error) {
@@ -45,7 +83,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
                 description: "Não foi possível encontrar o endereço para esta localização.",
             });
         } finally {
-            setIsLoading(false);
+            setIsReverseGeocoding(false);
         }
     }, [onLocationChange, toast]);
 
@@ -55,30 +93,10 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
     }, [reverseGeocode]);
 
     const handleMapClick = useCallback((e: LeafletMouseEvent) => {
-        const L = LRef.current;
-        if (!L) return;
-
         const { lat, lng } = e.latlng;
-        const newPos: LatLngExpression = [lat, lng];
-
-        if (markerRef.current) {
-            markerRef.current.setLatLng(newPos);
-        } else if (mapRef.current) {
-            const defaultIcon: Icon<IconOptions> = L.icon({
-                iconUrl,
-                iconRetinaUrl,
-                shadowUrl,
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            });
-            const marker = L.marker(newPos, { icon: defaultIcon, draggable: true }).addTo(mapRef.current);
-            markerRef.current = marker;
-            marker.on('dragend', handleMarkerDragEnd);
-        }
+        placeMarker(lat, lng);
         reverseGeocode(lat, lng);
-    }, [reverseGeocode, handleMarkerDragEnd]);
+    }, [placeMarker, reverseGeocode]);
 
 
     useEffect(() => {
@@ -114,21 +132,78 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
+            const search = async () => {
+                setIsSearching(true);
+                setSearchResults([]);
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(debouncedSearchQuery)}&format=json&addressdetails=1&countrycodes=BR`);
+                    const data: SearchResult[] = await response.json();
+                    
+                    const simplifiedResults = data.map(result => {
+                        const address = (result as any).address;
+                        const city = address?.city || address?.town || address?.village || '';
+                        const suburb = address?.suburb || address?.city_district || '';
+                        const displayName = [result.display_name.split(',')[0], suburb, city].filter(Boolean).join(', ');
+                        return {...result, display_name: displayName};
+                    });
+
+                    setSearchResults(simplifiedResults.slice(0, 5));
+                } catch (error) {
+                    console.error("Erro na busca de endereço:", error);
+                    toast({
+                        variant: "destructive",
+                        title: "Erro de Busca",
+                        description: "Não foi possível realizar a busca.",
+                    });
+                } finally {
+                    setIsSearching(false);
+                }
+            };
+            search();
+        } else {
+            setSearchResults([]);
+        }
+    }, [debouncedSearchQuery, toast]);
+
+    const handleSelectResult = (result: SearchResult) => {
+        const lat = parseFloat(result.lat);
+        const lng = parseFloat(result.lon);
+        setSearchQuery(result.display_name);
+        setSearchResults([]);
+        placeMarker(lat, lng);
+        onLocationChange(lat, lng, result.display_name);
+    };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-2 relative">
              <Input
                 type="text"
-                value={address}
-                readOnly
-                placeholder="O endereço aparecerá aqui após selecionar no mapa..."
-                className="bg-muted"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Digite um endereço ou nome de local..."
             />
-            <div className="h-80 w-full rounded-md border overflow-hidden relative">
+            {isSearching && <p className="text-sm text-muted-foreground p-2">Buscando...</p>}
+            {!isSearching && searchResults.length > 0 && (
+                 <div className="absolute top-full left-0 right-0 z-10 bg-card border rounded-md shadow-lg mt-1">
+                    {searchResults.map(result => (
+                        <Button
+                            key={result.place_id}
+                            variant="ghost"
+                            className="w-full justify-start text-left h-auto py-2 px-3"
+                            onClick={() => handleSelectResult(result)}
+                        >
+                            {result.display_name}
+                        </Button>
+                    ))}
+                 </div>
+            )}
+            <div className="h-80 w-full rounded-md border overflow-hidden relative mt-2">
                 <div ref={mapContainerRef} className="h-full w-full" />
-                 {isLoading && (
+                 {isReverseGeocoding && (
                     <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
-                        <Skeleton className="h-10 w-32" />
+                        <p>Atualizando endereço...</p>
                     </div>
                  )}
             </div>
