@@ -37,7 +37,7 @@ export function ProgressDisplay({ peopleReached }: ProgressDisplayProps) {
             <div className="space-y-3 px-4">
                 <Progress value={progressPercentage} className="h-4" />
                 <p className="text-center text-lg font-bold text-primary">
-                    {Math.round(progressPercentage)}% da meta alcançada!
+                    {Math.ceil(progressPercentage)}% da meta alcançada!
                 </p>
             </div>
         </div>
