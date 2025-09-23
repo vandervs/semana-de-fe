@@ -71,7 +71,7 @@ export default function Home() {
             </div>
             <ProgressDisplay peopleReached={peopleReached} />
         </div>
-        <div className="col-span-2 h-[80vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden">
+        <div className="relative col-span-2 h-[80vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden z-0">
             <MapDisplay initiatives={initiatives} />
         </div>
     </section>
