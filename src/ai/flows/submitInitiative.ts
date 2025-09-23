@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow to handle initiative submissions.
@@ -20,7 +21,7 @@ const InitiativeInputSchema = z.object({
   locationName: z.string().min(3, { message: "Selecione uma localização no mapa." }),
   latitude: z.number(),
   longitude: z.number(),
-  evangelists: z.array(PersonSchema).min(1, "Adicione pelo menos um evangelista."),
+  evangelists: z.array(PersonSchema).min(1, "Adicione pelo menos um participante."),
   evangelized: z.array(PersonSchema).min(1, "Adicione pelo menos uma pessoa evangelizada."),
   testimony: z.string().min(20, { message: "O testemunho deve ter pelo menos 20 caracteres." }).max(500, { message: "O testemunho não pode exceder 500 caracteres."}),
   interactionTypes: z.array(z.string()).refine((value) => value.some((item) => item), {
@@ -75,3 +76,5 @@ const submitInitiativeFlow = ai.defineFlow(
 export async function submitInitiative(input: InitiativeInput): Promise<void> {
     await submitInitiativeFlow(input);
 }
+
+    

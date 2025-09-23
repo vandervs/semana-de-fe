@@ -38,7 +38,7 @@ const formSchema = z.object({
   locationName: z.string().min(3, { message: "Selecione uma localização no mapa." }),
   latitude: z.number(),
   longitude: z.number(),
-  evangelists: z.array(personSchema).min(1, "Adicione pelo menos um evangelista."),
+  evangelists: z.array(personSchema).min(1, "Adicione pelo menos um participante."),
   evangelized: z.array(personSchema).min(1, "Adicione pelo menos uma pessoa evangelizada."),
   testimony: z.string().min(20, { message: "O testemunho deve ter pelo menos 20 caracteres." }).max(500, { message: "O testemunho não pode exceder 500 caracteres."}),
   interactionTypes: z.array(z.string()).refine((value) => value.some((item) => item), {
@@ -133,7 +133,7 @@ export function InitiativeForm() {
                         <div className="space-y-4">
                             <FormLabel className="flex items-center">
                                 <Users className="mr-2 h-5 w-5 text-muted-foreground" />
-                                Evangelistas
+                                Participantes
                             </FormLabel>
                             {evangelistsFields.map((field, index) => (
                                 <div key={field.id} className="flex items-end gap-2">
@@ -174,7 +174,7 @@ export function InitiativeForm() {
                             ))}
                             <Button type="button" variant="outline" size="sm" onClick={() => appendEvangelist({ name: "", contact: "" })}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Adicionar evangelista
+                                Adicionar participante
                             </Button>
                         </div>
                         
@@ -433,3 +433,5 @@ export function InitiativeForm() {
         </Card>
     );
 }
+
+    
