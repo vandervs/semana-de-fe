@@ -14,23 +14,12 @@ import type { Initiative } from '@/lib/definitions';
 import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 
-const firebaseConfig = {
-  "projectId": "studio-137720829-7ae77",
-  "appId": "1:515777802768:web:19cf89072b4538965e9095",
-  "apiKey": "AIzaSyByEY4L3RzgZRQA8PLCUxdZIx1Pc-01LRM",
-  "authDomain": "studio-137720829-7ae77.firebaseapp.com",
-  "storageBucket": "studio-137720829-7ae77.appspot.com",
-  "measurementId": "",
-  "messagingSenderId": "515777802768"
-};
-
-
 // Initialize Firebase Admin SDK for server-side operations
 if (!admin.apps.length) {
     try {
         admin.initializeApp({
             credential: admin.credential.applicationDefault(),
-            storageBucket: firebaseConfig.storageBucket,
+            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
         });
         console.log("Firebase Admin SDK initialized.");
     } catch (error) {
