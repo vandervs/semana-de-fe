@@ -106,21 +106,16 @@ const submitInitiativeFlow = ai.defineFlow(
             console.log('Image uploaded successfully:', photoUrl);
         } catch (error) {
             console.error('Failed to upload image:', error);
-            // Fallback to a placeholder if upload fails
-            const seed = Math.floor(Math.random() * 1000) + 1;
-            photoUrl = `https://picsum.photos/seed/err${seed}/600/400`;
+            // If upload fails, we will just proceed without a photoUrl.
+            photoUrl = '';
         }
-    } else {
-        // If no photo was uploaded, generate a random placeholder URL.
-        const seed = Math.floor(Math.random() * 1000) + 1;
-        photoUrl = `https://picsum.photos/seed/ev${seed}/600/400`;
     }
     
     const newInitiative: Omit<Initiative, 'id'> = {
         ...input,
         date: new Date().toISOString().split('T')[0],
         interactionTypes: input.interactionTypes as any,
-        photoUrl: photoUrl, // Use the potentially uploaded URL
+        photoUrl: photoUrl,
         photoHint: 'encontro pessoas', // Generic hint for now
     };
     
