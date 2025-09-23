@@ -186,7 +186,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
             />
             {isSearching && <p className="text-sm text-muted-foreground p-2">Buscando...</p>}
             {!isSearching && searchResults.length > 0 && (
-                 <div className="absolute top-full left-0 right-0 z-10 bg-card border rounded-md shadow-lg mt-1">
+                 <div className="absolute top-full left-0 right-0 z-50 bg-card border rounded-md shadow-lg mt-1">
                     {searchResults.map(result => (
                         <Button
                             key={result.place_id}
