@@ -17,7 +17,7 @@ export function ProgressDisplay({ peopleReached }: ProgressDisplayProps) {
 
     return (
         <div className="my-10 md:my-16">
-            <div className="mb-8 grid grid-cols-1 gap-8 text-center md:grid-cols-3 md:gap-4">
+            <div className="mb-8 grid grid-cols-1 gap-8 text-center md:gap-4">
                 <StatsCard 
                     title="Alunos Envolvidos"
                     value={STUDENTS_INVOLVED}

@@ -46,12 +46,14 @@ export function StatsCard({ title, value, icon: Icon }: StatsCardProps) {
     }, [value]);
 
     return (
-        <div className="flex flex-col items-center justify-center p-4">
-            <Icon className="h-10 w-10 text-primary mb-3" />
-            <div className="text-5xl font-extrabold text-foreground tracking-tighter">
-                {animatedValue.toLocaleString('pt-BR')}
+        <div className="flex items-center justify-start p-4">
+            <Icon className="h-10 w-10 text-primary mr-4" />
+            <div className="text-left">
+                <div className="text-4xl font-extrabold text-foreground tracking-tighter">
+                    {animatedValue.toLocaleString('pt-BR')}
+                </div>
+                <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider mt-1">{title}</h3>
             </div>
-            <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider mt-1">{title}</h3>
         </div>
     );
 }

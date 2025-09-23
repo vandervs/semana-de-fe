@@ -39,40 +39,40 @@ export default function Home() {
 
   if (loading) {
     return (
-        <section className="container flex-1 py-6">
-            <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8">
-                <div className="flex-1 space-y-4">
-                    <Skeleton className="h-12 w-96" />
-                    <Skeleton className="h-6 w-[400px]" />
+        <section className="container grid flex-1 grid-cols-1 gap-10 py-6 lg:grid-cols-3 lg:gap-12">
+            <div className="col-span-2 h-[80vh] w-full">
+                <Skeleton className="h-full w-full rounded-lg" />
+            </div>
+            <div className="col-span-1">
+                <div className="space-y-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                </div>
+                 <div className="my-10 space-y-8">
+                    <Skeleton className="h-24 w-full" />
+                    <Skeleton className="h-24 w-full" />
+                    <Skeleton className="h-24 w-full" />
                 </div>
             </div>
-            <div className="my-8 grid gap-4 md:grid-cols-3">
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
-            </div>
-            <Skeleton className="mt-8 h-[70vh] w-full rounded-lg" />
         </section>
     )
   }
 
   return (
-    <section className="container flex-1 py-6">
-       <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8">
-          <div className="flex-1 space-y-4">
-            <h1 className="inline-block font-headline text-4xl font-bold tracking-tight lg:text-5xl">
-              Mapa de Iniciativas
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Veja o evangelho se espalhando pelo Sudeste do Brasil.
-            </p>
-          </div>
-        </div>
-
-        <ProgressDisplay peopleReached={peopleReached} />
-
-        <div className="mt-8 h-[60vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden md:h-[70vh]">
+    <section className="container grid flex-1 grid-cols-1 gap-10 py-6 lg:grid-cols-3 lg:gap-12">
+        <div className="col-span-2 h-[80vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden">
             <MapDisplay initiatives={initiatives} />
+        </div>
+        <div className="col-span-1">
+            <div className="space-y-4">
+                 <h1 className="inline-block font-headline text-4xl font-bold tracking-tight lg:text-5xl">
+                    Mapa de Iniciativas
+                </h1>
+                <p className="text-xl text-muted-foreground">
+                    Veja o evangelho se espalhando pelo Sudeste do Brasil.
+                </p>
+            </div>
+            <ProgressDisplay peopleReached={peopleReached} />
         </div>
     </section>
   );
