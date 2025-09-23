@@ -39,16 +39,19 @@ export function TestimonyCard({ initiative }: { initiative: Initiative }) {
       timeZone: 'UTC', 
     });
 
+    const imageUrl = initiative.photoUrl || "https://picsum.photos/seed/placeholder/600/400";
+    const imageHint = initiative.photoUrl ? initiative.photoHint : "grupo pessoas";
+
     return (
         <Card className="flex h-full flex-col overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl">
             <CardHeader className="p-0">
                 <div className="relative aspect-video w-full">
                     <Image
-                        src={initiative.photoUrl}
+                        src={imageUrl}
                         alt={`Testemunho de ${initiative.locationName}`}
                         fill
                         className="object-cover"
-                        data-ai-hint={initiative.photoHint}
+                        data-ai-hint={imageHint}
                     />
                 </div>
             </CardHeader>

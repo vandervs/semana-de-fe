@@ -106,7 +106,6 @@ const submitInitiativeFlow = ai.defineFlow(
             console.log('Image uploaded successfully:', photoUrl);
         } catch (error) {
             console.error('Failed to upload image:', error);
-            // If upload fails, we will just proceed without a photoUrl.
             photoUrl = '';
         }
     }
@@ -115,7 +114,7 @@ const submitInitiativeFlow = ai.defineFlow(
         ...input,
         date: new Date().toISOString().split('T')[0],
         interactionTypes: input.interactionTypes as any,
-        photoUrl: photoUrl,
+        photoUrl: photoUrl, // Use the uploaded image URL or an empty string
         photoHint: 'encontro pessoas', // Generic hint for now
     };
     
