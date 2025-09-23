@@ -40,9 +40,6 @@ export default function Home() {
   if (loading) {
     return (
         <section className="container grid flex-1 grid-cols-1 gap-10 py-6 lg:grid-cols-3 lg:gap-12">
-            <div className="col-span-2 h-[80vh] w-full">
-                <Skeleton className="h-full w-full rounded-lg" />
-            </div>
             <div className="col-span-1">
                 <div className="space-y-4">
                     <Skeleton className="h-12 w-full" />
@@ -54,15 +51,15 @@ export default function Home() {
                     <Skeleton className="h-24 w-full" />
                 </div>
             </div>
+            <div className="col-span-2 h-[80vh] w-full">
+                <Skeleton className="h-full w-full rounded-lg" />
+            </div>
         </section>
     )
   }
 
   return (
     <section className="container grid flex-1 grid-cols-1 gap-10 py-6 lg:grid-cols-3 lg:gap-12">
-        <div className="col-span-2 h-[80vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden">
-            <MapDisplay initiatives={initiatives} />
-        </div>
         <div className="col-span-1">
             <div className="space-y-4">
                  <h1 className="inline-block font-headline text-4xl font-bold tracking-tight lg:text-5xl">
@@ -73,6 +70,9 @@ export default function Home() {
                 </p>
             </div>
             <ProgressDisplay peopleReached={peopleReached} />
+        </div>
+        <div className="col-span-2 h-[80vh] w-full rounded-lg border bg-card shadow-lg overflow-hidden">
+            <MapDisplay initiatives={initiatives} />
         </div>
     </section>
   );
