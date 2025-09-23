@@ -1,3 +1,4 @@
+
 "use client";
 
 import "leaflet/dist/leaflet.css";
@@ -96,7 +97,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ initiatives }) => {
   }, []);
 
   return (
-    <div ref={mapContainerRef} className="h-full w-full z-0" />
+    <div ref={mapContainerRef} className="h-full w-full" />
   );
 };
 
