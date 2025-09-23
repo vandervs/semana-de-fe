@@ -16,8 +16,8 @@ export function ProgressDisplay({ peopleReached }: ProgressDisplayProps) {
     const progressPercentage = (peopleReached / GOAL) * 100;
 
     return (
-        <div className="my-8 space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
+        <div className="my-10 md:my-16">
+            <div className="mb-8 grid grid-cols-1 gap-8 text-center md:grid-cols-3 md:gap-4">
                 <StatsCard 
                     title="Alunos Envolvidos"
                     value={STUDENTS_INVOLVED}
@@ -34,10 +34,10 @@ export function ProgressDisplay({ peopleReached }: ProgressDisplayProps) {
                     icon={Target}
                 />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3 px-4">
                 <Progress value={progressPercentage} className="h-4" />
-                <p className="text-right text-sm font-medium text-muted-foreground">
-                    {Math.round(progressPercentage)}% da meta alcançada
+                <p className="text-center text-lg font-bold text-primary">
+                    {Math.round(progressPercentage)}% da meta alcançada!
                 </p>
             </div>
         </div>
