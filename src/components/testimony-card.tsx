@@ -39,7 +39,7 @@ export function TestimonyCard({ initiative }: { initiative: Initiative }) {
       timeZone: 'UTC', 
     });
 
-    const imageUrl = initiative.photoUrl || "https://picsum.photos/seed/placeholder/600/400";
+    const imageUrl = initiative.photoUrl || "/placeholder.png";
     const imageHint = initiative.photoUrl ? initiative.photoHint : "grupo pessoas";
 
     return (
