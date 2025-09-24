@@ -15,12 +15,11 @@ import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 
 // Initialize Firebase Admin SDK for server-side operations
+// This is handled by the environment configuration on Vercel/Firebase now.
+// We only need to ensure the service account has permissions.
 if (!admin.apps.length) {
     try {
-        admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        });
+        admin.initializeApp();
         console.log("Firebase Admin SDK initialized.");
     } catch (error) {
         console.error("Error initializing Firebase Admin SDK:", error);
@@ -54,7 +53,7 @@ const InitiativeInputSchema = z.object({
 export type InitiativeInput = z.infer<typeof InitiativeInputSchema>;
 
 async function uploadImageToStorage(photoDataUri: string, folder: string): Promise<string> {
-    const bucket = adminStorage().bucket();
+    const bucket = adminStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
     const uniqueFilename = `${uuidv4()}.jpg`;
     const filePath = `${folder}/${uniqueFilename}`;
     const file = bucket.file(filePath);
