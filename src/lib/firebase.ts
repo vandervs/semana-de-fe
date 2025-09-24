@@ -13,12 +13,12 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 };
 
-
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase only if the project ID is available
+const app = !getApps().length && firebaseConfig.projectId ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
+
 
 export { 
     db, 
