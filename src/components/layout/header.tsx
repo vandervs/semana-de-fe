@@ -14,6 +14,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const navItems = [
   { label: "Mapa", href: "/" },
   { label: "Testemunhos", href: "/testimonies" },
+  { label: "Sobre", href: "/about" },
 ];
 
 export function Header() {
