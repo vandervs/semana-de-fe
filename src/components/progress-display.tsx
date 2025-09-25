@@ -27,7 +27,7 @@ export function ProgressDisplay({ peopleReached, conversations, presentations, a
                     icon={Users}
                 />
                 <StatsCard 
-                    title="Meta"
+                    title="Objetivo"
                     value={GOAL}
                     icon={Target}
                 />
