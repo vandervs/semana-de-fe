@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar, Target, Map, Users } from "lucide-react";
 
@@ -46,7 +47,7 @@ export default function AboutPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Target className="h-6 w-6 text-primary" />
-                                    Metas
+                                    Objetivos
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
