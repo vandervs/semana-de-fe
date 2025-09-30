@@ -15,8 +15,6 @@ import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 
 // Initialize Firebase Admin SDK for server-side operations
-// This is handled by the environment configuration on Vercel/Firebase now.
-// We only need to ensure the service account has permissions.
 if (!admin.apps.length) {
     try {
         admin.initializeApp();
@@ -94,15 +92,23 @@ const submitInitiativeFlow = ai.defineFlow(
             console.log('Image uploaded successfully:', photoUrl);
         } catch (error) {
             console.error('Failed to upload image:', error);
+            // Don't re-throw, allow submission without image
             photoUrl = '';
         }
     }
     
     const newInitiative: Omit<Initiative, 'id'> = {
-        ...input,
-        date: new Date().toISOString().split('T')[0],
+        locationName: input.locationName,
+        latitude: input.latitude,
+        longitude: input.longitude,
+        evangelists: input.evangelists,
+        evangelized: input.evangelized,
+        testimony: input.testimony,
         interactionTypes: input.interactionTypes as any,
-        photoUrl: photoUrl, // Use the uploaded image URL or an empty string
+        university: input.university,
+        evangelismTools: input.evangelismTools,
+        date: new Date().toISOString().split('T')[0],
+        photoUrl: photoUrl, // Use the uploaded image URL
         photoHint: 'encontro pessoas', // Generic hint for now
     };
     
