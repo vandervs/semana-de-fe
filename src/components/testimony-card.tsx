@@ -52,6 +52,7 @@ export function TestimonyCard({ initiative }: { initiative: Initiative }) {
                         fill
                         className="object-cover"
                         data-ai-hint={imageHint}
+                        unoptimized={imageUrl.startsWith('https://storage.googleapis.com')}
                     />
                 </div>
             </CardHeader>
