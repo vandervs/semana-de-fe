@@ -14,16 +14,8 @@ import type { Initiative } from '@/lib/definitions';
 import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 
-// Initialize Firebase Admin SDK for server-side operations
-if (!admin.apps.length) {
-    try {
-        admin.initializeApp();
-        console.log("Firebase Admin SDK initialized.");
-    } catch (error) {
-        console.error("Error initializing Firebase Admin SDK:", error);
-    }
-}
-
+// The Firebase Admin SDK is automatically initialized by the environment in Vercel.
+// Explicitly calling initializeApp() can cause build failures.
 const adminStorage = admin.storage;
 
 const PersonSchema = z.object({
@@ -51,7 +43,12 @@ const InitiativeInputSchema = z.object({
 export type InitiativeInput = z.infer<typeof InitiativeInputSchema>;
 
 async function uploadImageToStorage(photoDataUri: string, folder: string): Promise<string> {
-    const bucket = adminStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+    if (!bucketName) {
+        console.error('Firebase Storage bucket name is not configured.');
+        throw new Error('Firebase Storage bucket name is not configured.');
+    }
+    const bucket = adminStorage().bucket(bucketName);
     const uniqueFilename = `${uuidv4()}.jpg`;
     const filePath = `${folder}/${uniqueFilename}`;
     const file = bucket.file(filePath);
@@ -84,16 +81,16 @@ const submitInitiativeFlow = ai.defineFlow(
   },
   async (input) => {
     
-    let photoUrl = '';
+    let photoUrlValue = '';
     
     if (input.photo) {
         try {
-            photoUrl = await uploadImageToStorage(input.photo, 'initiatives');
-            console.log('Image uploaded successfully:', photoUrl);
+            photoUrlValue = await uploadImageToStorage(input.photo, 'initiatives');
+            console.log('Image uploaded successfully:', photoUrlValue);
         } catch (error) {
             console.error('Failed to upload image:', error);
             // Don't re-throw, allow submission without image
-            photoUrl = '';
+            photoUrlValue = '';
         }
     }
     
@@ -108,7 +105,7 @@ const submitInitiativeFlow = ai.defineFlow(
         university: input.university,
         evangelismTools: input.evangelismTools,
         date: new Date().toISOString().split('T')[0],
-        photoUrl: photoUrl, // Use the uploaded image URL
+        photoUrl: photoUrlValue, // Use the uploaded image URL
         photoHint: 'encontro pessoas', // Generic hint for now
     };
     
