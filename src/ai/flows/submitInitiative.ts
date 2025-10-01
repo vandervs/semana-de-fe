@@ -14,9 +14,38 @@ import type { Initiative } from '@/lib/definitions';
 import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 
-// The Firebase Admin SDK is automatically initialized by the environment in Vercel.
-// Explicitly calling initializeApp() can cause build failures.
-const adminStorage = admin.storage;
+// Securely initialize Firebase Admin SDK for Vercel environment
+if (!admin.apps.length) {
+    try {
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+        if (!privateKey) {
+            throw new Error("FIREBASE_PRIVATE_KEY environment variable is not set.");
+        }
+        if (!process.env.FIREBASE_CLIENT_EMAIL) {
+            throw new Error("FIREBASE_CLIENT_EMAIL environment variable is not set.");
+        }
+        if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
+            throw new Error("NEXT_PUBLIC_FIREBASE_PROJECT_ID environment variable is not set.");
+        }
+
+
+        admin.initializeApp({
+            credential: admin.credential.cert({
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: privateKey,
+                projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+            }),
+            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        });
+        console.log("Firebase Admin SDK initialized successfully.");
+    } catch (error) {
+        console.error("Error initializing Firebase Admin SDK:", error);
+        // We throw the error to ensure build fails if config is wrong.
+        throw new Error("Could not initialize Firebase Admin SDK. Please check server environment variables.");
+    }
+}
+
 
 const PersonSchema = z.object({
     name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
@@ -48,7 +77,7 @@ async function uploadImageToStorage(photoDataUri: string, folder: string): Promi
         console.error('Firebase Storage bucket name is not configured.');
         throw new Error('Firebase Storage bucket name is not configured.');
     }
-    const bucket = adminStorage().bucket(bucketName);
+    const bucket = admin.storage().bucket(bucketName);
     const uniqueFilename = `${uuidv4()}.jpg`;
     const filePath = `${folder}/${uniqueFilename}`;
     const file = bucket.file(filePath);
