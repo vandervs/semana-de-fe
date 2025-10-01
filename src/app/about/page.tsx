@@ -25,7 +25,7 @@ export default function AboutPage() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-lg text-foreground/80">
                             <p>
-                                A Semana de Fé é uma iniciativa de evangelismo da Cru que ocorrerá durante duas semanas no mês de outubro. Nosso objetivo é claro: alcançar 5.000 pessoas com a mensagem do evangelho, mobilizando aproximadamente 500 estudantes de nossos movimentos. Cada estudante terá a meta de evangelizar 10 pessoas ao longo das duas semanas.
+                                A Semana de Fé é uma iniciativa de evangelismo da Cru que ocorrerá durante duas semanas no mês de outubro. Nosso objetivo é claro: alcançar 3.000 pessoas com a mensagem do evangelho, mobilizando aproximadamente 500 estudantes de nossos movimentos. Cada estudante terá a meta de evangelizar 10 pessoas ao longo das duas semanas.
                             </p>
                         </CardContent>
                     </Card>
@@ -52,7 +52,7 @@ export default function AboutPage() {
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 <p className="text-lg"><span className="font-bold">500</span> estudantes mobilizados</p>
-                                <p className="text-lg"><span className="font-bold">5.000</span> pessoas alcançadas</p>
+                                <p className="text-lg"><span className="font-bold">3.000</span> pessoas alcançadas</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -66,7 +66,7 @@ export default function AboutPage() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-lg text-foreground/80">
                             <p>
-                                Cada iniciativa será informada através deste site dedicado. Ele serve como um centro de informações e registro, onde são inseridos os detalhes e contatos das interações evangelísticas. Além disso, o mapa interativo na página inicial mostra o impacto gerado em tempo real, visualizando as áreas alcançadas e o progresso em relação à nossa meta.
+                                Cada iniciativa será informada através deste site dedicado. Ele serve como um centro de informações e registro, onde são inseridos os detalhes e contatos das interações evangelísticas. Além disso, o mapa interativo na página inicial mostra o impacto gerado em tempo real, visualizando as áreas alcançadas e o progresso em relação ao nosso objetivo.
                             </p>
                         </CardContent>
                     </Card>
