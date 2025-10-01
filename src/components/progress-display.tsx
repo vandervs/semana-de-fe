@@ -13,7 +13,7 @@ interface ProgressDisplayProps {
 }
 
 const STUDENTS_INVOLVED = 500;
-const GOAL = 5000;
+const GOAL = 3000;
 
 export function ProgressDisplay({ peopleReached, conversations, presentations, acceptances }: ProgressDisplayProps) {
     const progressPercentage = (peopleReached / GOAL) * 100;
