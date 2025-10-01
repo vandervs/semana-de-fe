@@ -16,7 +16,7 @@ const STUDENTS_INVOLVED = 500;
 const GOAL = 3000;
 
 export function ProgressDisplay({ peopleReached, conversations, presentations, acceptances }: ProgressDisplayProps) {
-    const progressPercentage = (peopleReached / GOAL) * 100;
+    const progressPercentage = GOAL > 0 ? (peopleReached / GOAL) * 100 : 0;
 
     return (
         <div className="my-10 md:my-16">
