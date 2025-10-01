@@ -7,6 +7,9 @@ import { Toaster } from '@/components/ui/toaster';
 export const metadata: Metadata = {
   title: 'Semana de Fé',
   description: 'Mapeando iniciativas de evangelismo no Sudeste do Brasil.',
+  icons: {
+    icon: '/logo-cru.png',
+  },
 };
 
 export default function RootLayout({
