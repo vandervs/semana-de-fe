@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +40,7 @@ export function TestimonyCard({ initiative }: { initiative: Initiative }) {
       timeZone: 'UTC', 
     });
 
-    const imageUrl = initiative.photoUrl || "/placeholder.png";
+    const imageUrl = initiative.photoUrl ? initiative.photoUrl : "/placeholder.png";
     const imageHint = initiative.photoUrl ? initiative.photoHint : "grupo pessoas";
 
     return (
