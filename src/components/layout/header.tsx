@@ -14,6 +14,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
   { label: "Mapa", href: "/" },
+  { label: "Desafios", href: "/tasks" },
   { label: "Testemunhos", href: "/testimonies" },
   { label: "Sobre", href: "/about" },
 ];
@@ -28,7 +29,7 @@ export function Header() {
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            <Image src="/Logo Cru   - Colorido.png" alt="Logo Cru" width={24} height={24} className="h-6 w-6" />
+            <Image src="/logo-cru.png" alt="Logo Cru" width={24} height={24} className="h-6 w-6" />
             <span className="inline-block font-bold">Semana de Fé</span>
           </Link>
           {!isMobile && (
@@ -64,7 +65,7 @@ export function Header() {
                     </SheetTrigger>
                     <SheetContent side="right">
                     <Link href="/" className="mb-8 flex items-center" onClick={() => setIsSheetOpen(false)}>
-                        <Image src="/Logo Cru   - Colorido.png" alt="Logo Cru" width={24} height={24} className="mr-2 h-6 w-6" />
+                        <Image src="/logo-cru.png" alt="Logo Cru" width={24} height={24} className="mr-2 h-6 w-6" />
                         <span className="font-bold">Semana de Fé</span>
                     </Link>
                     <nav className="flex flex-col gap-6">

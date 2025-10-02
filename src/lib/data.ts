@@ -1,6 +1,7 @@
+
 import type { Initiative } from './definitions';
 import { db } from './firebase';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, Timestamp, doc, runTransaction, getDoc } from 'firebase/firestore';
 
 export async function getInitiatives(): Promise<Initiative[]> {
     const initiativesCol = collection(db, 'initiatives');
@@ -9,10 +10,10 @@ export async function getInitiatives(): Promise<Initiative[]> {
     const initiativeList = initiativeSnapshot.docs.map(doc => {
         const data = doc.data();
         
-        let createdAtStr: string | null = null;
-        if (data.createdAt && data.createdAt instanceof Timestamp) {
-            createdAtStr = data.createdAt.toDate().toISOString();
-        }
+        // Safely convert timestamp
+        const createdAt = data.createdAt instanceof Timestamp 
+            ? data.createdAt.toDate().toISOString() 
+            : new Date().toISOString();
 
         return {
             id: doc.id,
@@ -28,7 +29,7 @@ export async function getInitiatives(): Promise<Initiative[]> {
             date: data.date, 
             photoUrl: data.photoUrl || '',
             photoHint: data.photoHint || '',
-            createdAt: createdAtStr,
+            createdAt: createdAt,
         } as Initiative;
     });
     return initiativeList;
@@ -37,15 +38,41 @@ export async function getInitiatives(): Promise<Initiative[]> {
 export async function addInitiative(initiative: Omit<Initiative, 'id'>) {
     try {
         const initiativesCol = collection(db, 'initiatives');
-        // The 'initiative' object from the flow now correctly contains the photoUrl.
-        // We pass the whole object to be saved.
         await addDoc(initiativesCol, {
             ...initiative,
             createdAt: serverTimestamp()
         });
-        console.log("Initiative added to Firestore with data:", initiative);
     } catch (error) {
         console.error("Error adding initiative to Firestore: ", error);
         throw new Error("Could not add initiative to database.");
     }
+}
+
+export async function incrementTaskCount(taskId: string): Promise<void> {
+  const taskRef = doc(db, 'task_engagement', taskId);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const taskDoc = await transaction.get(taskRef);
+      if (!taskDoc.exists()) {
+        transaction.set(taskRef, { count: 1 });
+      } else {
+        const newCount = (taskDoc.data().count || 0) + 1;
+        transaction.update(taskRef, { count: newCount });
+      }
+    });
+  } catch (e) {
+    console.error("Transaction failed: ", e);
+    throw new Error("Could not update task count.");
+  }
+}
+
+export async function getTaskCounts(): Promise<Record<string, number>> {
+    const counts: Record<string, number> = {};
+    const q = query(collection(db, "task_engagement"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        counts[doc.id] = doc.data().count;
+    });
+    return counts;
 }
