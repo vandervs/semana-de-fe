@@ -1,7 +1,7 @@
 
 import type { Initiative } from './definitions';
 import { db } from './firebase';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, Timestamp, doc, runTransaction, getDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, Timestamp } from 'firebase/firestore';
 
 export async function getInitiatives(): Promise<Initiative[]> {
     const initiativesCol = collection(db, 'initiatives');
@@ -35,7 +35,7 @@ export async function getInitiatives(): Promise<Initiative[]> {
     return initiativeList;
 }
 
-export async function addInitiative(initiative: Omit<Initiative, 'id'>) {
+export async function addInitiative(initiative: Omit<Initiative, 'id' | 'createdAt'>) {
     try {
         const initiativesCol = collection(db, 'initiatives');
         await addDoc(initiativesCol, {
@@ -46,33 +46,4 @@ export async function addInitiative(initiative: Omit<Initiative, 'id'>) {
         console.error("Error adding initiative to Firestore: ", error);
         throw new Error("Could not add initiative to database.");
     }
-}
-
-export async function incrementTaskCount(taskId: string): Promise<void> {
-  const taskRef = doc(db, 'task_engagement', taskId);
-
-  try {
-    await runTransaction(db, async (transaction) => {
-      const taskDoc = await transaction.get(taskRef);
-      if (!taskDoc.exists()) {
-        transaction.set(taskRef, { count: 1 });
-      } else {
-        const newCount = (taskDoc.data().count || 0) + 1;
-        transaction.update(taskRef, { count: newCount });
-      }
-    });
-  } catch (e) {
-    console.error("Transaction failed: ", e);
-    throw new Error("Could not update task count.");
-  }
-}
-
-export async function getTaskCounts(): Promise<Record<string, number>> {
-    const counts: Record<string, number> = {};
-    const q = query(collection(db, "task_engagement"));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-        counts[doc.id] = doc.data().count;
-    });
-    return counts;
 }

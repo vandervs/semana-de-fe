@@ -12,54 +12,59 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { useState, useEffect } from 'react';
-import { Instagram, Copy, Check } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Instagram, Download, CheckCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { incrementTaskCount, getTaskCounts } from '@/lib/data';
+import { cn } from '@/lib/utils';
+import * as htmlToImage from 'html-to-image';
+import Image from 'next/image';
 
 export default function TasksPage() {
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [taskCounts, setTaskCounts] = useState<Record<string, number>>({});
-  const [isCopied, setIsCopied] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const { toast } = useToast();
+  const shareableImageRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    async function fetchCounts() {
-      const counts = await getTaskCounts();
-      setTaskCounts(counts);
-    }
-    fetchCounts();
-  }, []);
+  const handleTaskSelect = (taskId: string) => {
+    setSelectedTasks((prev) =>
+      prev.includes(taskId)
+        ? prev.filter((id) => id !== taskId)
+        : [...prev, taskId]
+    );
+  };
+  
+  const getTaskById = (id: string) => tasks.find(task => task.id === id);
 
-  const handleShareClick = async (task: Task) => {
-    try {
-      await incrementTaskCount(task.id);
-      setTaskCounts((prevCounts) => ({
-        ...prevCounts,
-        [task.id]: (prevCounts[task.id] || 0) + 1,
-      }));
-      setSelectedTask(task);
-    } catch (error) {
-      console.error('Error incrementing task count:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Não foi possível registrar a seleção. Tente novamente.',
+  const handleDownloadImage = useCallback(() => {
+    if (!shareableImageRef.current) return;
+    setIsGeneratingImage(true);
+
+    htmlToImage.toPng(shareableImageRef.current, { cacheBust: true, pixelRatio: 2 })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = 'meus-desafios-semana-de-fe.png';
+        link.href = dataUrl;
+        link.click();
+        toast({
+            title: "Imagem Baixada!",
+            description: "Sua imagem de desafios está pronta para ser compartilhada.",
+        });
+      })
+      .catch((err) => {
+        console.error('oops, something went wrong!', err);
+        toast({
+            variant: "destructive",
+            title: "Erro ao gerar imagem",
+            description: "Não foi possível criar sua imagem. Tente novamente.",
+        });
+      })
+      .finally(() => {
+        setIsGeneratingImage(false);
+        setIsShareModalOpen(false);
       });
-    }
-  };
+  }, [toast]);
 
-  const handleCopyToClipboard = () => {
-    if (!selectedTask) return;
-    const shareText = `Desafio da Semana de Fé: ${selectedTask.description} #semanadefe`;
-    navigator.clipboard.writeText(shareText);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-     toast({
-        title: "Copiado!",
-        description: "O texto do desafio foi copiado. Agora cole nos seus Stories!",
-    });
-  };
 
   return (
     <section className="container py-8 md:py-12">
@@ -68,18 +73,29 @@ export default function TasksPage() {
           Desafios de Fé
         </h1>
         <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-          Escolha um desafio, aceite-o e compartilhe com seus amigos para espalhar o movimento!
+          Selecione os desafios que você completou esta semana e compartilhe sua jornada para inspirar outros!
         </p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {tasks.map((task) => {
           const Icon = task.icon;
+          const isSelected = selectedTasks.includes(task.id);
           return (
             <Card
               key={task.id}
-              className="flex flex-col justify-between overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+              onClick={() => handleTaskSelect(task.id)}
+              className={cn(
+                "flex flex-col justify-between overflow-hidden rounded-lg shadow-lg transition-all duration-300 cursor-pointer relative",
+                "hover:scale-105 hover:shadow-xl",
+                isSelected && "ring-2 ring-primary ring-offset-2"
+              )}
             >
+              {isSelected && (
+                <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <CheckCircle className="h-4 w-4" />
+                </div>
+              )}
               <CardHeader className="flex-row items-center gap-4 space-y-0 pb-2">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                   <Icon className="h-6 w-6 text-primary" />
@@ -89,51 +105,68 @@ export default function TasksPage() {
               <CardContent className="flex-grow">
                 <p className="text-lg font-medium text-foreground/80">{task.description}</p>
               </CardContent>
-              <div className="p-6 pt-0">
-                <Button className="w-full" onClick={() => handleShareClick(task)}>
-                  <Instagram className="mr-2 h-4 w-4" /> Compartilhar
-                </Button>
-              </div>
             </Card>
           );
         })}
       </div>
 
-      {selectedTask && (
-        <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
-          <DialogContent className="sm:max-w-md">
+       {selectedTasks.length > 0 && (
+         <div className="mt-12 text-center">
+            <Button size="lg" onClick={() => setIsShareModalOpen(true)}>
+                <Instagram className="mr-2 h-5 w-5" />
+                Gerar Imagem para Compartilhar
+            </Button>
+         </div>
+       )}
+
+      
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="max-w-xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Compartilhe seu Desafio!</DialogTitle>
-              <DialogDescription>
-                Copie o texto abaixo e compartilhe nos seus Stories do Instagram para inspirar outros.
-              </DialogDescription>
+            <DialogTitle className="text-2xl text-center">Compartilhe seus Desafios!</DialogTitle>
+            <DialogDescription className="text-center">
+                Sua imagem está pronta. Baixe-a e compartilhe nos seus Stories do Instagram para inspirar outros.
+            </DialogDescription>
             </DialogHeader>
-            <div className="my-4 rounded-lg border bg-muted p-4">
-                <p className="text-lg font-semibold text-center">
-                    {selectedTask.description}
-                </p>
-                <p className="text-center text-sm text-muted-foreground mt-2">#semanadefe</p>
+            
+            <div 
+              ref={shareableImageRef} 
+              className="my-4 rounded-lg border bg-card p-6"
+            >
+              <div className="flex flex-col items-center text-center mb-6">
+                <Image src="/logo-cru.png" alt="Logo Cru" width={60} height={60} />
+                <h2 className="text-2xl font-bold mt-2">Desafios de Fé Cumpridos!</h2>
+                <p className="text-muted-foreground">Participei da Semana de Fé e completei estes desafios.</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {selectedTasks.map(taskId => {
+                    const task = getTaskById(taskId);
+                    if (!task) return null;
+                    const Icon = task.icon;
+                    return (
+                        <div key={taskId} className="flex items-center gap-4 rounded-md border p-3 bg-background">
+                            <Icon className="h-5 w-5 text-primary shrink-0" />
+                            <p className="text-base font-medium">{task.description}</p>
+                        </div>
+                    )
+                })}
+              </div>
+               <p className="text-center text-lg font-bold text-primary mt-6">#semanadefe</p>
             </div>
-            <p className="text-center text-sm text-muted-foreground">
-                Este desafio já foi aceito <span className="font-bold text-primary">{taskCounts[selectedTask.id] || 1}</span> vezes!
-            </p>
+
             <DialogFooter className="sm:justify-center pt-4">
-              <Button onClick={handleCopyToClipboard} size="lg">
-                {isCopied ? (
-                    <>
-                        <Check className="mr-2 h-5 w-5" /> Copiado
-                    </>
-                ) : (
-                    <>
-                        <Copy className="mr-2 h-5 w-5" /> Copiar Texto
-                    </>
-                )}
-              </Button>
+            <Button onClick={handleDownloadImage} size="lg" disabled={isGeneratingImage}>
+              {isGeneratingImage ? 'Gerando...' : (
+                <>
+                  <Download className="mr-2 h-5 w-5" /> Baixar Imagem
+                </>
+              )}
+            </Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+        </DialogContent>
+      </Dialog>
+      
     </section>
   );
 }
-
