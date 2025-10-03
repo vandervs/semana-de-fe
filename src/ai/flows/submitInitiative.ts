@@ -17,23 +17,10 @@ import { v4 as uuidv4 } from 'uuid';
 // Securely initialize Firebase Admin SDK for Vercel environment
 if (!admin.apps.length) {
     try {
-        const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-
-        if (!privateKey) {
-            throw new Error("FIREBASE_PRIVATE_KEY environment variable is not set.");
-        }
-        if (!process.env.FIREBASE_CLIENT_EMAIL) {
-            throw new Error("FIREBASE_CLIENT_EMAIL environment variable is not set.");
-        }
-        if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
-            throw new Error("NEXT_PUBLIC_FIREBASE_PROJECT_ID environment variable is not set.");
-        }
-
-
         admin.initializeApp({
             credential: admin.credential.cert({
                 clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: privateKey,
+                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
                 projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
             }),
             storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
