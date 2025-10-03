@@ -40,7 +40,7 @@ export default function TasksPage() {
     if (!shareableImageRef.current) return;
     setIsGeneratingImage(true);
 
-    htmlToImage.toPng(shareableImageRef.current, { cacheBust: true, pixelRatio: 2 })
+    htmlToImage.toPng(shareableImageRef.current, { cacheBust: true, pixelRatio: 2, skipAutoScale: true })
       .then((dataUrl) => {
         const link = document.createElement('a');
         link.download = 'meus-desafios-semana-de-fe.png';
@@ -132,9 +132,11 @@ export default function TasksPage() {
             <div 
               ref={shareableImageRef} 
               className="my-4 rounded-lg border bg-card p-6"
+              style={{
+                backgroundColor: 'var(--card)'
+              }}
             >
               <div className="flex flex-col items-center text-center mb-6">
-                <Image src="/logo-cru.png" alt="Logo Cru" width={60} height={60} />
                 <h2 className="text-2xl font-bold mt-2">Desafios de Fé Cumpridos!</h2>
                 <p className="text-muted-foreground">Participei da Semana de Fé e completei estes desafios.</p>
               </div>
