@@ -14,26 +14,6 @@ import type { Initiative } from '@/lib/definitions';
 import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 
-// Securely initialize Firebase Admin SDK for Vercel environment
-if (!admin.apps.length) {
-    try {
-        admin.initializeApp({
-            credential: admin.credential.cert({
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-                projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-            }),
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        });
-        console.log("Firebase Admin SDK initialized successfully.");
-    } catch (error) {
-        console.error("Error initializing Firebase Admin SDK:", error);
-        // We throw the error to ensure build fails if config is wrong.
-        throw new Error("Could not initialize Firebase Admin SDK. Please check server environment variables.");
-    }
-}
-
-
 const PersonSchema = z.object({
     name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
     contact: z.string().optional(),
@@ -59,6 +39,26 @@ const InitiativeInputSchema = z.object({
 export type InitiativeInput = z.infer<typeof InitiativeInputSchema>;
 
 async function uploadImageToStorage(photoDataUri: string, folder: string): Promise<string> {
+    
+    // Securely initialize Firebase Admin SDK for Vercel environment only when needed
+    if (!admin.apps.length) {
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+                }),
+                storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+            });
+            console.log("Firebase Admin SDK initialized successfully in-flight.");
+        } catch (error) {
+            console.error("Error initializing Firebase Admin SDK in-flight:", error);
+            // We throw the error to ensure we know if config is wrong during execution.
+            throw new Error("Could not initialize Firebase Admin SDK. Please check server environment variables.");
+        }
+    }
+
     const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
     if (!bucketName) {
         console.error('Firebase Storage bucket name is not configured.');
