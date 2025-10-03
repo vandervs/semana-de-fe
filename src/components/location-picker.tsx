@@ -18,6 +18,38 @@ type SearchResult = {
     lat: string;
     lon: string;
     display_name: string;
+    address: {
+        road?: string;
+        suburb?: string;
+        city_district?: string;
+        city?: string;
+        town?: string;
+        village?: string;
+        [key: string]: any;
+    };
+};
+
+// Function to construct a simplified display name
+const getSimpleDisplayName = (result: SearchResult | { display_name: string; address: any }): string => {
+    const address = result.address;
+    if (!address) return result.display_name.split(',').slice(0, 2).join(', ');
+
+    const placeName = result.display_name.split(',')[0];
+    const suburb = address.suburb || address.city_district || '';
+    const city = address.city || address.town || address.village || '';
+
+    const parts = [placeName, suburb, city].filter(Boolean);
+    const uniqueParts = [...new Set(parts)]; // Remove duplicates
+
+    if (uniqueParts.length === 0) return "Localização desconhecida";
+    if (uniqueParts.length <= 2) return uniqueParts.join(', ');
+    
+    // If placeName is a number (like a house number), it might not be useful.
+    if (!isNaN(Number(placeName))) {
+        return [suburb, city].filter(Boolean).join(', ');
+    }
+
+    return uniqueParts.slice(0, 2).join(', ');
 };
 
 export function LocationPicker({ onLocationChange }: LocationPickerProps) {
@@ -53,15 +85,15 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
     const reverseGeocode = useCallback(async (lat: number, lng: number) => {
         setIsReverseGeocoding(true);
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
             const data = await response.json();
             if (data && data.display_name) {
-                const newName = data.display_name;
+                const newName = getSimpleDisplayName(data);
                 setSearchQuery(newName); // Update input field with the address
                 onLocationChange(lat, lng, newName);
             } else {
                  setSearchQuery("Endereço não encontrado.");
-                 onLocationChange(lat, lng, "");
+                 onLocationChange(lat, lng, "Endereço não encontrado.");
             }
         } catch (error) {
             console.error("Erro na geocodificação reversa:", error);
@@ -143,16 +175,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
                 try {
                     const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(debouncedSearchQuery)}&format=json&addressdetails=1&countrycodes=BR`);
                     const data: SearchResult[] = await response.json();
-                    
-                    const simplifiedResults = data.map(result => {
-                        const address = (result as any).address;
-                        const city = address?.city || address?.town || address?.village || '';
-                        const suburb = address?.suburb || address?.city_district || '';
-                        const displayName = [result.display_name.split(',')[0], suburb, city].filter(Boolean).join(', ');
-                        return {...result, display_name: displayName};
-                    });
-
-                    setSearchResults(simplifiedResults.slice(0, 5));
+                    setSearchResults(data.slice(0, 5));
                 } catch (error) {
                     console.error("Erro na busca de endereço:", error);
                     toast({
@@ -173,10 +196,11 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
     const handleSelectResult = (result: SearchResult) => {
         const lat = parseFloat(result.lat);
         const lng = parseFloat(result.lon);
-        setSearchQuery(result.display_name);
+        const simpleName = getSimpleDisplayName(result);
+        setSearchQuery(simpleName);
         setSearchResults([]);
         placeMarker(lat, lng);
-        onLocationChange(lat, lng, result.display_name);
+        onLocationChange(lat, lng, simpleName);
     };
 
     return (
@@ -186,6 +210,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Digite um endereço ou nome de local..."
+                disabled={isReverseGeocoding}
             />
             {isSearching && <p className="text-sm text-muted-foreground p-2">Buscando...</p>}
             {!isSearching && searchResults.length > 0 && (
@@ -197,7 +222,7 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
                             className="w-full justify-start text-left h-auto py-2 px-3"
                             onClick={() => handleSelectResult(result)}
                         >
-                            {result.display_name}
+                            {getSimpleDisplayName(result)}
                         </Button>
                     ))}
                  </div>
@@ -216,3 +241,5 @@ export function LocationPicker({ onLocationChange }: LocationPickerProps) {
         </div>
     );
 }
+
+    
