@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'Semana de Fé',
   description: 'Mapeando iniciativas de evangelismo no Sudeste do Brasil.',
   icons: {
-    icon: '/home/user/studio/public/Logo Cru   - Colorido.png',
+    icon: '/home/user/studio/public/logo-cru.png',
   },
 };
 
