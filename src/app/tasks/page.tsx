@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Instagram, CheckCircle, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTaskCounts, updateTaskCount } from '@/lib/data';
@@ -51,9 +51,28 @@ export default function TasksPage() {
     setSelectedTasks((prev) => prev.filter((_, index) => index !== indexToRemove));
     updateTaskCount(taskToRemove.id, -1);
   };
+  
+  const handleRemoveGroupedTask = (taskToRemove: Task) => {
+    const lastIndex = selectedTasks.map(t => t.id).lastIndexOf(taskToRemove.id);
+    if (lastIndex !== -1) {
+        handleTaskRemove(taskToRemove, lastIndex);
+    }
+  };
 
   const evangelismTasksCount = selectedTasks.filter(task => evangelismCategories.includes(task.category)).length;
   const freeTasksCount = selectedTasks.length - evangelismTasksCount;
+  
+  const groupedSelectedTasks = useMemo(() => {
+    const taskMap = new Map<string, { task: Task; count: number }>();
+    selectedTasks.forEach(task => {
+        if (taskMap.has(task.id)) {
+            taskMap.get(task.id)!.count++;
+        } else {
+            taskMap.set(task.id, { task, count: 1 });
+        }
+    });
+    return Array.from(taskMap.values());
+  }, [selectedTasks]);
 
   return (
     <section className="container py-8 md:py-12">
@@ -85,11 +104,11 @@ export default function TasksPage() {
         {selectedTasks.length > 0 && (
           <div className="mt-4">
               <h3 className="text-lg font-semibold text-center mb-2">Sua Lista de Desafios:</h3>
-              <ul className="flex flex-wrap justify-center gap-2">
-                  {selectedTasks.map((task, index) => (
-                      <li key={`${task.id}-${index}`} className="flex items-center gap-2 bg-muted p-2 rounded-md text-sm">
-                          <span>{task.description}</span>
-                          <button onClick={() => handleTaskRemove(task, index)} className="text-red-500 hover:text-red-700">
+               <ul className="flex flex-wrap justify-center gap-2">
+                  {groupedSelectedTasks.map(({ task, count }) => (
+                      <li key={task.id} className="flex items-center gap-2 bg-muted p-2 rounded-md text-sm">
+                          <span>{task.description} {count > 1 && <span className="font-bold">(x{count})</span>}</span>
+                          <button onClick={() => handleRemoveGroupedTask(task)} className="text-red-500 hover:text-red-700">
                               &times;
                           </button>
                       </li>
