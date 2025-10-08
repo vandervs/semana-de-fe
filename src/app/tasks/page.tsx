@@ -34,7 +34,7 @@ export default function TasksPage() {
           Desafios de Fé
         </h1>
         <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-          Selecione os desafios que você completou esta semana e compartilhe sua jornada para inspirar outros!
+          Cada estudante deve escolher 10 desafios para cumprir, sendo 6 de evangelismo (categorias: Interação, Conversa, Convite) e 4 livres. O mesmo desafio pode ser escolhido mais de uma vez.
         </p>
       </div>
 
