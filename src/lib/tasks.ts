@@ -88,4 +88,16 @@ export const tasks: Task[] = [
     description: 'Pensar em como você pode ajudar o movimento no seu campus e fazer isso.',
     icon: HelpingHand,
   },
+  {
+    id: 'conversa-espiritual-conecta',
+    category: 'Conversa',
+    description: 'Iniciar uma conversa espiritual usando a ferramenta Conecta.',
+    icon: MessageCircle,
+  },
+  {
+    id: 'conversa-espiritual-perspectiva',
+    category: 'Conversa',
+    description: 'Iniciar uma conversa espiritual usando a ferramenta Perspectiva.',
+    icon: MessageCircle,
+  },
 ];
