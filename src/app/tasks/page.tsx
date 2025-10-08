@@ -43,10 +43,8 @@ export default function TasksPage() {
   }, []);
 
   const handleTaskSelect = (task: Task) => {
-    if (selectedTasks.length < 10) {
-      setSelectedTasks((prev) => [...prev, task]);
-      updateTaskCount(task.id, 1);
-    }
+    setSelectedTasks((prev) => [...prev, task]);
+    updateTaskCount(task.id, 1);
   };
   
   const handleTaskRemove = (taskToRemove: Task, indexToRemove: number) => {
@@ -112,8 +110,7 @@ export default function TasksPage() {
               onClick={() => handleTaskSelect(task)}
               className={cn(
                 "flex flex-col justify-between overflow-hidden rounded-lg shadow-lg transition-all duration-300 cursor-pointer relative h-full",
-                "hover:scale-105 hover:shadow-xl",
-                selectedTasks.length >= 10 && "opacity-60 cursor-not-allowed"
+                "hover:scale-105 hover:shadow-xl"
               )}
             >
               <CardHeader className="flex-row items-center gap-4 space-y-0 pb-2">
