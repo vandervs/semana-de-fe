@@ -25,7 +25,7 @@ export default function AboutPage() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-lg text-foreground/80">
                             <p>
-                                A Semana de Fé é uma iniciativa de evangelismo da Cru que ocorrerá durante duas semanas no mês de outubro. Nosso objetivo é claro: alcançar 3.000 pessoas com a mensagem do evangelho, mobilizando aproximadamente 500 estudantes de nossos movimentos. Cada estudante terá a meta de evangelizar 10 pessoas ao longo das duas semanas.
+                                A Semana de Fé é uma iniciativa de evangelismo da Cru que ocorrerá durante duas semanas no mês de outubro. Nosso objetivo é claro: alcançar 3.000 pessoas com a mensagem do evangelho, mobilizando aproximadamente 500 estudantes de nossos movimentos. Cada estudante terá a meta de cumprir 10 desafios ao longo das duas semanas, sendo 6 deles focados em evangelismo.
                             </p>
                         </CardContent>
                     </Card>
